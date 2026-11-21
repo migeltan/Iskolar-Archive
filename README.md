@@ -17,9 +17,7 @@ Classroom-style LMS: Angular (frontend) + Supabase (backend). Full plan, roles, 
    ```
 
 3. Open http://localhost:4200
-
-
-csc
+then
 If `npm start` complains about your Node version, update Node to the current LTS.
 
 ## Rules
