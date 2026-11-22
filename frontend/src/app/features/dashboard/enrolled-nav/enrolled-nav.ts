@@ -1,6 +1,7 @@
-import { Component, effect, inject, signal } from '@angular/core';
+import { Component, effect, inject, input, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { AuthService } from '../../../core/auth/auth.service';
 import { MySection } from '../../../core/models/classwork.models';
 import { Enrollments } from '../../../core/services/enrollments';
@@ -10,11 +11,14 @@ import { sectionDesign } from '../section-design';
 /** Sidebar block for students: To-do, My grades and the joined classes. */
 @Component({
   selector: 'app-enrolled-nav',
-  imports: [RouterLink, RouterLinkActive, MatIconModule, Skeleton],
+  imports: [RouterLink, RouterLinkActive, MatIconModule, MatTooltipModule, Skeleton],
   templateUrl: './enrolled-nav.html',
   styleUrl: './enrolled-nav.scss',
+  host: { '[class.collapsed]': 'collapsed()' },
 })
 export class EnrolledNav {
+  /** True while the sidebar is the icon-only rail. */
+  collapsed = input(false);
   auth = inject(AuthService);
   private enrollments = inject(Enrollments);
 

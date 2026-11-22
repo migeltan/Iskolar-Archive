@@ -1,53 +1,57 @@
+@use '../../../shared/layout/shell/nav';
+
+@include nav.nav-item;
+
+:host {
+  display: block;
+}
+
 .nav {
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  padding: 8px 12px;
+  gap: 4px;
 }
 
-.item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 8px 12px;
-  border-radius: 999px;
-  color: inherit;
-  text-decoration: none;
-  transition: background-color 0.15s ease;
-
-  &:hover {
-    background: var(--mat-sys-surface-container-high);
-  }
-
-  &:focus-visible {
-    outline: 3px solid var(--mat-sys-primary);
-    outline-offset: 2px;
-  }
-
-  &.active {
-    background: var(--mat-sys-secondary-container);
-    color: var(--mat-sys-on-secondary-container);
-  }
+.divider {
+  height: 1px;
+  margin: 8px 4px;
+  background: rgba(255, 255, 255, 0.14);
 }
 
 .heading {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin: 16px 12px 4px;
-  color: var(--mat-sys-on-surface-variant);
-  font: var(--mat-sys-label-large);
+  justify-content: space-between;
+  margin: 4px 12px 2px;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.count {
+  color: rgba(255, 255, 255, 0.6);
+  letter-spacing: 0;
+}
+
+// A joined class: the coloured dot stays visible when the rail is collapsed.
+.item.section {
+  padding-left: 8px;
 }
 
 .dot {
   display: grid;
-  flex-shrink: 0;
+  flex: 0 0 32px;
   place-items: center;
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.35);
   color: #fff;
-  font: var(--mat-sys-title-small);
+  font-size: 0.85rem;
+  font-weight: 600;
 }
 
 .text {
@@ -55,19 +59,44 @@
   flex-direction: column;
   gap: 2px;
   min-width: 0;
+  line-height: 1.2;
 }
 
 .code {
-  font: var(--mat-sys-title-small);
+  overflow: hidden;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-overflow: ellipsis;
 }
 
 .sec {
-  color: var(--mat-sys-on-surface-variant);
-  font: var(--mat-sys-body-small);
+  overflow: hidden;
+  font-size: 0.75rem;
+  font-weight: 400;
+  opacity: 0.7;
+  text-overflow: ellipsis;
 }
 
-.empty {
-  margin: 4px 12px;
-  color: var(--mat-sys-on-surface-variant);
-  font: var(--mat-sys-body-small);
+.lock {
+  margin-left: auto;
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+}
+
+.sk {
+  opacity: 0.35;
+}
+
+// Collapsed rail: icons only.
+:host(.collapsed) {
+  .label,
+  .heading {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .heading {
+    display: none;
+  }
 }

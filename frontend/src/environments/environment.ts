@@ -2,6 +2,7 @@
 // NEVER put the service_role / secret key here.
 export const environment = {
   production: true,
+  useMockAuth: false, // true = fake offline sign-in (testing only, never commit)
   supabaseUrl: 'https://dpvkgrpxjmqhzzdaidlk.supabase.co',
   supabaseAnonKey: 'sb_publishable_-HnAYYdYws-vMeKYXkApJw_6-Jvndwu',
 };

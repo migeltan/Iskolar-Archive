@@ -1,27 +1,90 @@
-<mat-toolbar color="primary">
-  <button mat-icon-button (click)="nav.toggle()">
-    <mat-icon>menu</mat-icon>
-  </button>
-  <span>Iskolar Archive</span>
-  <span class="spacer"></span>
-  <span class="user">{{ auth.profile()?.full_name || auth.profile()?.email }}</span>
-  <button mat-button (click)="logout()">Logout</button>
-</mat-toolbar>
+<div class="layout" [class.open]="open()">
+  <div class="backdrop" (click)="open.set(false)" aria-hidden="true"></div>
 
-<mat-sidenav-container class="container">
-  <mat-sidenav #nav mode="side" opened>
-    <mat-nav-list>
-      <a mat-list-item routerLink="/dashboard" routerLinkActive="active">Dashboard</a>
-      <app-enrolled-nav />
+  <aside class="rail" aria-label="Sidebar" (click)="onRailClick($event)">
+    <div class="brand">
+      <button
+        type="button"
+        class="toggle"
+        (click)="toggle()"
+        [attr.aria-expanded]="open()"
+        aria-label="Toggle sidebar"
+      >
+        <mat-icon>{{ open() ? 'menu_open' : 'menu' }}</mat-icon>
+      </button>
+      <span class="brand-name label">Iskolar Archive</span>
+    </div>
+
+    <nav class="nav" aria-label="Main">
+      <a
+        class="item"
+        routerLink="/dashboard"
+        routerLinkActive="active"
+        [matTooltip]="open() ? '' : 'Dashboard'"
+        matTooltipPosition="right"
+      >
+        <mat-icon>space_dashboard</mat-icon>
+        <span class="label">Dashboard</span>
+      </a>
+
+      <app-enrolled-nav [collapsed]="!open()" />
+
       @if (auth.role() === 'teacher' || auth.role() === 'admin') {
-        <a mat-list-item routerLink="/courses" routerLinkActive="active">My courses</a>
+        <a
+          class="item"
+          routerLink="/courses"
+          routerLinkActive="active"
+          [matTooltip]="open() ? '' : 'My courses'"
+          matTooltipPosition="right"
+        >
+          <mat-icon>menu_book</mat-icon>
+          <span class="label">My courses</span>
+        </a>
       }
       @if (auth.role() === 'admin') {
-        <a mat-list-item routerLink="/admin" routerLinkActive="active">Admin</a>
+        <a
+          class="item"
+          routerLink="/admin"
+          routerLinkActive="active"
+          [matTooltip]="open() ? '' : 'Admin'"
+          matTooltipPosition="right"
+        >
+          <mat-icon>admin_panel_settings</mat-icon>
+          <span class="label">Admin</span>
+        </a>
       }
-    </mat-nav-list>
-  </mat-sidenav>
-  <mat-sidenav-content class="content">
-    <router-outlet />
-  </mat-sidenav-content>
-</mat-sidenav-container>
+    </nav>
+
+    <div class="foot">
+      <div class="user" [matTooltip]="open() ? '' : displayName()" matTooltipPosition="right">
+        <span class="avatar">{{ initial() }}</span>
+        <span class="who label">
+          <span class="name">{{ displayName() }}</span>
+          <span class="role">{{ auth.role() }}</span>
+        </span>
+      </div>
+      <button
+        type="button"
+        class="item logout"
+        (click)="logout()"
+        [matTooltip]="open() ? '' : 'Logout'"
+        matTooltipPosition="right"
+      >
+        <mat-icon>logout</mat-icon>
+        <span class="label">Logout</span>
+      </button>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="mobile-bar">
+      <button type="button" class="toggle" (click)="toggle()" aria-label="Open menu">
+        <mat-icon>menu</mat-icon>
+      </button>
+      <span>Iskolar Archive</span>
+    </header>
+    <main class="content">
+      <router-outlet />
+    </main>
+  </div>
+</div>

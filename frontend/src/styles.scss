@@ -53,3 +53,28 @@ body {
   height: 100%;
 }
 /* You can add global styles to this file, and also import other style files */
+
+// Iskolar Archive maroon theme (same as the login page).
+// Overrides the azure Material tokens set above.
+html {
+  --mat-sys-primary: #800000;
+  --mat-sys-on-primary: #ffffff;
+  --mat-sys-primary-container: #f6dcd8;
+  --mat-sys-on-primary-container: #410000;
+  --mat-sys-secondary: #7a5650;
+  --mat-sys-on-secondary: #ffffff;
+  --mat-sys-secondary-container: #f4dfdb;
+  --mat-sys-on-secondary-container: #2c1512;
+  --mat-sys-surface-tint: #800000;
+  --mat-sys-background: #faf8f5;
+  --mat-sys-surface: #faf8f5;
+  --mat-sys-surface-variant: #ebe5df;
+  --mat-sys-on-surface-variant: #5b5650;
+  --mat-sys-surface-container-lowest: #ffffff;
+  --mat-sys-surface-container-low: #f7f3ee;
+  --mat-sys-surface-container: #f3eee8;
+  --mat-sys-surface-container-high: #ede7e0;
+  --mat-sys-surface-container-highest: #e7e0d8;
+  --mat-sys-outline: #857670;
+  --mat-sys-outline-variant: #e4dfd9;
+}

@@ -157,8 +157,14 @@ export class Login implements OnInit, OnDestroy {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
-  private showError(): void {
-    this.errorMessage.set('Could not sign in. Check your details and try again.');
+  private showError(err?: unknown): void {
+    console.error('Sign-in failed:', err);
+    const msg = err instanceof Error ? err.message : '';
+    this.errorMessage.set(
+      /fetch|network/i.test(msg)
+        ? 'Cannot reach the server. Check your connection and try again.'
+        : 'Could not sign in. Check your details and try again.',
+    );
     this.loading.set(false);
     this.form.enable();
   }
@@ -201,22 +207,8 @@ export class Login implements OnInit, OnDestroy {
       } else {
         await this.goNext('/dashboard');
       }
-    } catch {
-      this.showError();
-    }
-  }
-
-  protected async google(): Promise<void> {
-    if (this.loading()) return;
-    this.errorMessage.set('');
-    this.loading.set(true);
-    this.form.disable();
-
-    try {
-      await this.auth.signInWithGoogle();
-      await this.goNext('/dashboard'); // Google mock defaults to student
-    } catch {
-      this.showError();
+    } catch (err) {
+      this.showError(err);
     }
   }
 }

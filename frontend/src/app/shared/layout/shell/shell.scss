@@ -1,6 +1,271 @@
-.spacer { flex: 1 1 auto; }
-.user { margin-right: 12px; font-size: 14px; }
-.container { height: calc(100vh - 64px); }
-mat-sidenav { width: 220px; }
-.content { padding: 24px; }
-.active { font-weight: 600; }
+@use 'nav';
+
+@include nav.nav-item;
+
+:host {
+  display: block;
+}
+
+.layout {
+  display: flex;
+  min-height: 100vh;
+  background: #faf8f5;
+}
+
+// ---------- Sidebar: flat maroon, click anywhere on it to open or close ----------
+.rail {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  box-sizing: border-box;
+  width: 72px;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  border-right: 1px solid #5c0000;
+  background: #800000;
+  color: #fff;
+  cursor: e-resize;
+  transition:
+    width 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+    background-color 0.2s ease;
+
+  // Right-edge line that lights up on hover: the whole sidebar reads as clickable.
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 3px;
+    background: rgba(255, 255, 255, 0);
+    pointer-events: none;
+    transition: background-color 0.2s ease;
+  }
+
+  &:hover {
+    background: #8a0a0a;
+
+    &::after {
+      background: rgba(255, 255, 255, 0.28);
+    }
+  }
+}
+
+.layout.open .rail {
+  width: 264px;
+  cursor: w-resize;
+}
+
+// Labels fade out when the rail is collapsed (the rail clips them).
+.layout:not(.open) .label {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.brand {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 14px;
+  height: 64px;
+  padding: 0 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.toggle {
+  display: grid;
+  flex: 0 0 48px;
+  place-items: center;
+  width: 48px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: #fff;
+  cursor: pointer;
+  transition: background-color 0.18s ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.12);
+  }
+
+  &:focus-visible {
+    outline: 2px solid #e8b84a;
+    outline-offset: 2px;
+  }
+}
+
+.brand-name {
+  font-size: 1.1rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.nav {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+// ---------- Footer: user + logout ----------
+.foot {
+  display: flex;
+  flex-shrink: 0;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  padding: 4px;
+}
+
+.avatar {
+  display: grid;
+  flex: 0 0 40px;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+  font-weight: 600;
+}
+
+.who {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.name {
+  overflow: hidden;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.role {
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+button.item {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  font-family: inherit;
+  text-align: left;
+}
+
+.logout:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+// ---------- Page area ----------
+.main {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.content {
+  flex: 1 1 auto;
+  padding: 24px;
+}
+
+.mobile-bar,
+.backdrop {
+  display: none;
+}
+
+// ---------- Phones: the rail becomes an overlay drawer ----------
+@media (max-width: 768px) {
+  .layout {
+    display: block;
+  }
+
+  .rail {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 264px;
+    height: auto;
+    visibility: hidden;
+    transform: translateX(-100%);
+    transition:
+      transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+      visibility 0s linear 0.25s;
+  }
+
+  .layout.open .rail {
+    visibility: visible;
+    transform: none;
+    transition:
+      transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+      visibility 0s;
+  }
+
+  .backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 999;
+    background: rgba(0, 0, 0, 0.45);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+  }
+
+  .layout.open .backdrop {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .mobile-bar {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 56px;
+    padding: 0 12px;
+    background: #800000;
+    color: #fff;
+    font-weight: 600;
+  }
+
+  .content {
+    padding: 16px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rail,
+  .backdrop {
+    transition: none;
+  }
+}

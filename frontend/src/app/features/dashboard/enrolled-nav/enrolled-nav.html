@@ -1,40 +1,73 @@
 @if (auth.role() === 'student') {
   <nav class="nav" aria-label="My classes">
-    <a class="item" routerLink="/todo" routerLinkActive="active">
+    <a
+      class="item"
+      routerLink="/todo"
+      routerLinkActive="active"
+      [matTooltip]="collapsed() ? 'To-do' : ''"
+      matTooltipPosition="right"
+    >
       <mat-icon>checklist</mat-icon>
-      <span class="code">To-do</span>
+      <span class="label">To-do</span>
     </a>
-    <a class="item" routerLink="/my-grades" routerLinkActive="active">
+    <a
+      class="item"
+      routerLink="/my-grades"
+      routerLinkActive="active"
+      [matTooltip]="collapsed() ? 'My grades' : ''"
+      matTooltipPosition="right"
+    >
       <mat-icon>grade</mat-icon>
-      <span class="code">My grades</span>
+      <span class="label">My grades</span>
     </a>
 
-    <p class="heading"><mat-icon>school</mat-icon> Enrolled</p>
+    <div class="divider" role="presentation"></div>
 
     @if (loading()) {
       <div role="status" aria-label="Loading classes">
-        @for (n of [1, 2, 3]; track n) {
-          <div class="item">
-            <app-skeleton width="36px" height="36px" radius="50%" />
-            <div class="text">
-              <app-skeleton width="80px" height="14px" />
-              <app-skeleton width="56px" height="12px" />
-            </div>
+        @for (n of [1, 2]; track n) {
+          <div class="item sk">
+            <app-skeleton width="32px" height="32px" radius="50%" />
           </div>
         }
       </div>
-    } @else {
+    } @else if (sections().length > 0) {
+      <p class="heading">
+        <span>Enrolled</span>
+        <span class="count">{{ sections().length }}</span>
+      </p>
       @for (s of sections(); track s.id) {
-        <a class="item" [routerLink]="['/class', s.id]" routerLinkActive="active">
-          <span class="dot" [style.background]="design(s.id).c1">{{ s.course_code.charAt(0) }}</span>
-          <span class="text">
+        <a
+          class="item section"
+          [routerLink]="['/class', s.id]"
+          routerLinkActive="active"
+          [matTooltip]="collapsed() ? s.course_code + ' · ' + s.name : ''"
+          matTooltipPosition="right"
+        >
+          <span class="dot" [style.background]="design(s.id).c1">{{
+            s.course_code.charAt(0)
+          }}</span>
+          <span class="text label">
             <span class="code">{{ s.course_code }}</span>
             <span class="sec">{{ s.name }}</span>
           </span>
         </a>
-      } @empty {
-        <p class="empty">Join a section to see it here.</p>
       }
+    } @else {
+      <div
+        class="item disabled"
+        role="link"
+        aria-disabled="true"
+        matTooltip="Join a section to unlock"
+        matTooltipPosition="right"
+      >
+        <mat-icon>school</mat-icon>
+        <span class="text label">
+          <span class="code">Enrolled</span>
+          <span class="sec">Join a section to unlock</span>
+        </span>
+        <mat-icon class="lock label">lock</mat-icon>
+      </div>
     }
   </nav>
 }

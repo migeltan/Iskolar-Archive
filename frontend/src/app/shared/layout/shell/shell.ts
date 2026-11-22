@@ -1,19 +1,18 @@
-import { Component, inject } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
-import { MatToolbarModule } from '@angular/material/toolbar';
-import { MatSidenavModule } from '@angular/material/sidenav';
-import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
-import { MatButtonModule } from '@angular/material/button';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { AuthService } from '../../../core/auth/auth.service';
 import { EnrolledNav } from '../../../features/dashboard/enrolled-nav/enrolled-nav';
 
 @Component({
   selector: 'app-shell',
   imports: [
-    RouterOutlet, RouterLink, RouterLinkActive,
-    MatToolbarModule, MatSidenavModule, MatListModule,
-    MatIconModule, MatButtonModule,
+    RouterOutlet,
+    RouterLink,
+    RouterLinkActive,
+    MatIconModule,
+    MatTooltipModule,
     EnrolledNav,
   ],
   templateUrl: './shell.html',
@@ -22,6 +21,39 @@ import { EnrolledNav } from '../../../features/dashboard/enrolled-nav/enrolled-n
 export class Shell {
   auth = inject(AuthService);
   private router = inject(Router);
+
+  /** Sidebar starts as an icon rail; the menu button opens it. */
+  open = signal(false);
+
+  displayName = computed(
+    () => this.auth.profile()?.full_name || this.auth.profile()?.email || 'User',
+  );
+  initial = computed(() => this.displayName().charAt(0).toUpperCase());
+
+  toggle() {
+    this.open.update((v) => !v);
+  }
+
+  /**
+   * Clicking any empty part of the sidebar opens or closes it.
+   * Links and buttons keep doing their own thing.
+   */
+  onRailClick(event: MouseEvent) {
+    const target = event.target as HTMLElement;
+    if (target.closest('a')) {
+      this.closeOnMobile();
+      return;
+    }
+    if (target.closest('button, .disabled')) return;
+    this.toggle();
+  }
+
+  /** On phones the sidebar is a drawer, so close it after picking a page. */
+  closeOnMobile() {
+    if (window.matchMedia('(max-width: 768px)').matches) {
+      this.open.set(false);
+    }
+  }
 
   async logout() {
     await this.auth.signOut();

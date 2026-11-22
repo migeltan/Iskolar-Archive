@@ -27,18 +27,6 @@
         Sign in with your school account to access your classes, materials and grades.
       </p>
 
-      <button
-        mat-stroked-button
-        class="full"
-        type="button"
-        [disabled]="loading()"
-        (click)="google()"
-      >
-        Sign in with Google
-      </button>
-
-      <div class="divider"><span>or sign in with email</span></div>
-
       <form [formGroup]="form" (ngSubmit)="submit()">
         <mat-form-field appearance="outline" class="full">
           <mat-label>I am a</mat-label>

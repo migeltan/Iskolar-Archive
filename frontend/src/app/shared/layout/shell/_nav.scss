@@ -1,0 +1,94 @@
+// Shared look for sidebar rows (used by the shell and by app-enrolled-nav).
+@mixin nav-item {
+  .label {
+    transition:
+      opacity 0.2s ease 0.05s,
+      transform 0.18s ease;
+  }
+
+  .item {
+    position: relative;
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    gap: 14px;
+    height: 44px;
+    padding: 0 12px;
+    box-sizing: border-box;
+    overflow: hidden;
+    border-radius: 10px;
+    color: rgba(255, 255, 255, 0.78);
+    font-size: 0.95rem;
+    font-weight: 500;
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+    transition:
+      background-color 0.18s ease,
+      color 0.18s ease;
+
+    mat-icon {
+      flex-shrink: 0;
+    }
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+
+      .label {
+        transform: translateX(2px);
+      }
+    }
+
+    &:focus-visible {
+      outline: 2px solid #e8b84a;
+      outline-offset: 2px;
+    }
+
+    &.active {
+      background: rgba(255, 255, 255, 0.14);
+      color: #fff;
+
+      // The current page gets the filled version of its icon.
+      mat-icon {
+        font-variation-settings:
+          'FILL' 1,
+          'wght' 400,
+          'GRAD' 0,
+          'opsz' 24;
+      }
+
+      &::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 10px;
+        bottom: 10px;
+        width: 3px;
+        border-radius: 0 3px 3px 0;
+        background: #e8b84a;
+      }
+    }
+
+    &.disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+
+      &:hover {
+        background: transparent;
+        color: rgba(255, 255, 255, 0.78);
+
+        .label {
+          transform: none;
+        }
+      }
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .label,
+    .item {
+      transition: none;
+    }
+  }
+}
