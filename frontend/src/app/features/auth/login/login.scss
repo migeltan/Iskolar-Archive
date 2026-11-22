@@ -240,3 +240,29 @@ input:-webkit-autofill:focus {
     animation: none;
   }
 }
+.form-info {
+  margin: 0 0 12px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: #f4efe9;
+  color: #4a443e;
+  font-size: 0.85rem;
+}
+
+.switch {
+  margin: 16px 0 0;
+  text-align: center;
+  font-size: 0.875rem;
+  color: #5b5650;
+}
+
+.link {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-weight: 600;
+  color: var(--maroon);
+  text-decoration: underline;
+  cursor: pointer;
+}

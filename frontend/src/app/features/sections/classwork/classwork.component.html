@@ -17,7 +17,11 @@
   </div>
 
   <!-- TOPICS LOOP (first group is the renamable default) -->
-  @for (group of groups; track group.name ?? 'default-group') {
+  @if (loading()) {
+    <p class="topic__empty">Loading…</p>
+  }
+
+  @for (group of groups(); track group.name ?? 'default-group') {
     <div class="topic">
       <div class="topic__header">
         <h2 class="topic__name">{{ group.name ?? defaultTopicName() }}</h2>
@@ -62,7 +66,9 @@
             (click)="deleteTopic(group.name)"
           >
             <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-              <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" />
+              <path
+                d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"
+              />
             </svg>
           </button>
         </div>
@@ -79,12 +85,7 @@
             }
 
             <div class="item-card__actions">
-              <button
-                type="button"
-                class="icon-button"
-                aria-label="Edit"
-                (click)="openEdit(item)"
-              >
+              <button type="button" class="icon-button" aria-label="Edit" (click)="openEdit(item)">
                 <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                   <path
                     d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 000-1.41l-2.34-2.34a1 1 0 00-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"
@@ -110,19 +111,14 @@
           <p class="item-card__details">{{ item.details }}</p>
 
           <div class="item-card__footer">
-            @if (attachmentName(item); as fileName) {
-              <button
-                type="button"
-                class="action-pill"
-                mat-stroked-button
-                (click)="openAttachment(item)"
-              >
+            @for (file of item.files; track file.id) {
+              <button type="button" class="action-pill" mat-stroked-button (click)="openFile(file)">
                 <svg class="pill-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                   <path
                     d="M16.5 6v11.5a4 4 0 01-8 0V5a2.5 2.5 0 015 0v10.5a1 1 0 01-2 0V6H10v9.5a2.5 2.5 0 005 0V5a4 4 0 00-8 0v12.5a5.5 5.5 0 0011 0V6h-1.5z"
                   />
                 </svg>
-                {{ fileName }}
+                {{ file.fileName }}
               </button>
             }
             @if (item.linkUrl) {

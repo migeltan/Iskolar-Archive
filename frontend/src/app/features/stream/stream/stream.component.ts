@@ -1,65 +1,115 @@
-import { Component, inject } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { CommonModule } from '@angular/common';
-import { demoDataLoaded } from '../../../shared/mock/lms-mock-data';
-
-interface PostComment {
-  author: string;
-  date: string;
-  content: string;
-}
-
-interface Post {
-  author: string;
-  date: string;
-  content: string;
-  comments: PostComment[];
-  draft?: string;
-}
+import { DatePipe } from '@angular/common';
+import { Component, OnInit, inject, signal } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { Announcements, StreamComment, StreamPost } from '../../../core/services/announcements';
 
 @Component({
   selector: 'app-stream',
   standalone: true,
-  imports: [FormsModule, CommonModule],
+  imports: [DatePipe],
   templateUrl: './stream.component.html',
   styleUrl: './stream.component.scss',
 })
-export class StreamComponent {
-  newPost = '';
-  posts: Post[] = demoDataLoaded()
-    ? [
-        {
-          author: 'Prof. Santos',
-          date: 'October 28, 2026 10:00 AM',
-          content: 'Welcome to SIA! Please check the Classwork tab for the syllabus.',
-          comments: [],
-        },
-      ]
-    : [];
+export class StreamComponent implements OnInit {
+  private readonly route = inject(ActivatedRoute);
+  private readonly announcements = inject(Announcements);
 
-  submitPost(): void {
-    if (!this.newPost.trim()) {
-      return;
-    }
-    this.posts.unshift({
-      author: 'Prof. Santos',
-      date: new Date().toLocaleString(),
-      content: this.newPost.trim(),
-      comments: [],
-    });
-    this.newPost = '';
+  // The section id lives on the parent route (section/:id), this page is its child.
+  private readonly sectionId = this.route.parent?.snapshot.paramMap.get('id') ?? '';
+
+  protected readonly posts = signal<StreamPost[]>([]);
+  protected readonly teacherName = signal('Teacher');
+  protected readonly loading = signal(true);
+  protected readonly error = signal('');
+  protected readonly posting = signal(false);
+  protected readonly newPost = signal('');
+  // Comment drafts by post id
+  protected readonly drafts = signal<Record<string, string>>({});
+
+  ngOnInit(): void {
+    void this.load();
   }
 
-  addComment(post: Post): void {
-    const content = post.draft?.trim();
-    if (!content) {
-      return;
+  private async load(): Promise<void> {
+    this.loading.set(true);
+    this.error.set('');
+    try {
+      const [posts, name] = await Promise.all([
+        this.announcements.list(this.sectionId),
+        this.announcements.teacherName(this.sectionId),
+      ]);
+      this.posts.set(posts);
+      this.teacherName.set(name);
+    } catch (err) {
+      console.error('Could not load the stream', err);
+      this.error.set('Could not load posts. Check your connection and reload.');
+    } finally {
+      this.loading.set(false);
     }
-    post.comments.push({
-      author: 'Prof. Santos',
-      date: new Date().toLocaleString(),
-      content,
-    });
-    post.draft = '';
+  }
+
+  protected draft(postId: string): string {
+    return this.drafts()[postId] ?? '';
+  }
+
+  protected setDraft(postId: string, value: string): void {
+    this.drafts.update((d) => ({ ...d, [postId]: value }));
+  }
+
+  protected async submitPost(): Promise<void> {
+    const body = this.newPost().trim();
+    if (!body || this.posting()) return;
+    this.posting.set(true);
+    this.error.set('');
+    try {
+      const post = await this.announcements.post(this.sectionId, body);
+      this.posts.update((list) => [post, ...list]);
+      this.newPost.set('');
+    } catch (err) {
+      console.error('Could not post', err);
+      this.error.set('Could not post. Try again.');
+    } finally {
+      this.posting.set(false);
+    }
+  }
+
+  protected async deletePost(post: StreamPost): Promise<void> {
+    if (!confirm('Delete this post and its comments?')) return;
+    try {
+      await this.announcements.removePost(post.id);
+      this.posts.update((list) => list.filter((p) => p.id !== post.id));
+    } catch (err) {
+      console.error('Could not delete the post', err);
+      this.error.set('Could not delete the post.');
+    }
+  }
+
+  protected async addComment(post: StreamPost): Promise<void> {
+    const body = this.draft(post.id).trim();
+    if (!body) return;
+    try {
+      const comment = await this.announcements.addComment(post.id, body);
+      this.posts.update((list) =>
+        list.map((p) => (p.id === post.id ? { ...p, comments: [...p.comments, comment] } : p)),
+      );
+      this.setDraft(post.id, '');
+    } catch (err) {
+      console.error('Could not comment', err);
+      this.error.set('Could not post the comment. Try again.');
+    }
+  }
+
+  protected async deleteComment(post: StreamPost, comment: StreamComment): Promise<void> {
+    try {
+      await this.announcements.removeComment(comment.id);
+      this.posts.update((list) =>
+        list.map((p) =>
+          p.id === post.id ? { ...p, comments: p.comments.filter((c) => c.id !== comment.id) } : p,
+        ),
+      );
+    } catch (err) {
+      console.error('Could not delete the comment', err);
+      this.error.set('Could not delete the comment.');
+    }
   }
 }

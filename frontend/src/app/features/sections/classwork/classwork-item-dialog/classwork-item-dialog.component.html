@@ -38,19 +38,37 @@
             #fileInput
             type="file"
             hidden
+            multiple
             [accept]="acceptAttr"
-            (change)="onFileSelected($event)"
+            (change)="onFilesSelected($event)"
           />
-          <button mat-stroked-button type="button" (click)="fileInput.click()">
-            {{ fileName() ? 'Replace file' : 'Upload file' }}
-          </button>
-          @if (fileName(); as name) {
-            <span class="file-upload__name">{{ name }}</span>
-          }
+          <button mat-stroked-button type="button" (click)="fileInput.click()">Add files</button>
+          <span class="file-upload__name">PDF, DOCX, PPTX, PNG or JPG, up to 10 MB each</span>
           @if (fileError(); as err) {
             <p class="msg-error">{{ err }}</p>
           }
         </div>
+
+        @if (existingFiles().length || newFiles().length) {
+          <ul class="file-list">
+            @for (file of existingFiles(); track file.id) {
+              <li>
+                <span class="file-list__name">{{ file.fileName }}</span>
+                <button type="button" class="file-list__remove" (click)="removeExisting(file)">
+                  Remove
+                </button>
+              </li>
+            }
+            @for (file of newFiles(); track $index) {
+              <li>
+                <span class="file-list__name">{{ file.name }}</span>
+                <button type="button" class="file-list__remove" (click)="removeNew($index)">
+                  Remove
+                </button>
+              </li>
+            }
+          </ul>
+        }
 
         <mat-form-field appearance="outline" class="full">
           <mat-label>Link (optional)</mat-label>

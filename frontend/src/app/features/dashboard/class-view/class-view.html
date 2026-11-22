@@ -19,9 +19,16 @@
     >
       <h1>{{ s.course_title }}</h1>
       <p>
-        {{ s.course_code }} · {{ s.name }}@if (s.term) { · {{ s.term }} }
+        {{ s.course_code }} · {{ s.name }}
+        @if (s.term) {
+          · {{ s.term }}
+        }
       </p>
     </header>
+
+    <app-class-stream [sectionId]="s.id" />
+
+    <app-class-materials [sectionId]="s.id" />
 
     <app-activity-list [sectionId]="s.id" />
   } @else {

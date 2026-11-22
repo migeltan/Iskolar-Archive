@@ -6,48 +6,71 @@
       type="text"
       class="post-input"
       placeholder="Announce something to your class..."
-      [(ngModel)]="newPost"
+      maxlength="5000"
+      [value]="newPost()"
+      (input)="newPost.set($any($event.target).value)"
       (keyup.enter)="submitPost()"
     />
     <div class="post-footer">
-      <button class="post-btn" (click)="submitPost()" [disabled]="!newPost.trim()">POST</button>
+      <button class="post-btn" (click)="submitPost()" [disabled]="!newPost().trim() || posting()">
+        {{ posting() ? 'POSTING…' : 'POST' }}
+      </button>
     </div>
   </div>
 
+  @if (error()) {
+    <div class="feed-error" role="alert">{{ error() }}</div>
+  }
+
   <!-- FEED -->
   <div class="feed">
-    <div class="feed-empty" *ngIf="posts.length === 0">No posts available. Create one above.</div>
+    @if (loading()) {
+      <div class="feed-empty">Loading posts…</div>
+    } @else if (posts().length === 0) {
+      <div class="feed-empty">No posts available. Create one above.</div>
+    }
 
-    <div class="feed-item" *ngFor="let post of posts">
-      <div class="feed-header">
-        <span class="author">{{ post.author }}</span>
-        <span class="date">{{ post.date }}</span>
-      </div>
-      <div class="feed-content">
-        {{ post.content }}
-      </div>
-
-      <!-- COMMENTS (must stay inside the post loop) -->
-      <div class="comments">
-        <div class="comment" *ngFor="let comment of post.comments">
-          <span class="comment__author">{{ comment.author }}</span>
-          <span class="comment__date">{{ comment.date }}</span>
-          <p class="comment__text">{{ comment.content }}</p>
+    @for (post of posts(); track post.id) {
+      <div class="feed-item">
+        <div class="feed-header">
+          <span class="author">{{ teacherName() }}</span>
+          <span class="date">{{ post.createdAt | date: 'MMM d, y, h:mm a' }}</span>
+          <button type="button" class="delete-btn" (click)="deletePost(post)">Delete</button>
         </div>
+        <div class="feed-content">{{ post.body }}</div>
 
-        <div class="comment-box">
-          <input
-            type="text"
-            class="comment-input"
-            placeholder="Add a comment..."
-            [(ngModel)]="post.draft"
-            (keyup.enter)="addComment(post)"
-          />
-          <button class="comment-btn" (click)="addComment(post)" [disabled]="!post.draft?.trim()">
-            POST
-          </button>
+        <div class="comments">
+          @for (comment of post.comments; track comment.id) {
+            <div class="comment">
+              <span class="comment__author">{{ comment.authorName }}</span>
+              <span class="comment__date">{{ comment.createdAt | date: 'MMM d, y, h:mm a' }}</span>
+              <button type="button" class="delete-btn" (click)="deleteComment(post, comment)">
+                Delete
+              </button>
+              <p class="comment__text">{{ comment.body }}</p>
+            </div>
+          }
+
+          <div class="comment-box">
+            <input
+              type="text"
+              class="comment-input"
+              placeholder="Add a comment..."
+              maxlength="2000"
+              [value]="draft(post.id)"
+              (input)="setDraft(post.id, $any($event.target).value)"
+              (keyup.enter)="addComment(post)"
+            />
+            <button
+              class="comment-btn"
+              (click)="addComment(post)"
+              [disabled]="!draft(post.id).trim()"
+            >
+              POST
+            </button>
+          </div>
         </div>
       </div>
-    </div>
+    }
   </div>
 </div>

@@ -7,6 +7,8 @@ import { AuthService } from '../../../core/auth/auth.service';
 import { MySection } from '../../../core/models/classwork.models';
 import { Enrollments } from '../../../core/services/enrollments';
 import { ActivityList } from '../../classwork/activities/activity-list/activity-list';
+import { ClassMaterials } from './class-materials/class-materials';
+import { ClassStream } from './class-stream/class-stream';
 import { Skeleton } from '../../skeleton/skeleton';
 import { sectionDesign } from '../section-design';
 
@@ -18,6 +20,8 @@ import { sectionDesign } from '../section-design';
     MatIconModule,
     MatProgressSpinnerModule,
     ActivityList,
+    ClassMaterials,
+    ClassStream,
     Skeleton,
   ],
   templateUrl: './class-view.html',

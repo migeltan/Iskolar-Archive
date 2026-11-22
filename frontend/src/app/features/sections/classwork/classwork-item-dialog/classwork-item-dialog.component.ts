@@ -5,31 +5,39 @@ import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/materia
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 
-import { Activity, ClassworkKind } from '../../../../shared/models/lms.models';
-import { displayNameFromPath } from '../../../../shared/storage/storage.service';
+import { ClassworkFile, ClassworkItem } from '../../../../core/services/classwork';
+import { ClassworkKind } from '../../../../shared/models/lms.models';
 
 export type ClassworkDialogKind = 'Topic' | ClassworkKind;
 
 export interface ClassworkDialogData {
   kind: ClassworkDialogKind;
-  item?: Activity;
+  item?: ClassworkItem;
   initialTitle?: string; // set when renaming a topic
 }
 
 export interface ClassworkDialogResult {
   title: string;
   details: string;
-  dueAt: string | null;
+  dueAt: string | null; // ISO timestamp
   points: number;
-  file: File | null;
+  files: File[]; // new files to upload
+  removedFileIds: string[]; // existing files to delete
   linkUrl: string | null;
 }
 
-const MAX_FILE_BYTES = 50 * 1024 * 1024;
-const ALLOWED_EXTENSIONS = [
-  'pdf', 'doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx', 'txt',
-  'png', 'jpg', 'jpeg', 'zip',
-];
+// Must match the `materials` storage bucket: PDF, DOCX, PPTX and images, 10 MB each.
+const MAX_FILE_BYTES = 10 * 1024 * 1024;
+const ALLOWED_EXTENSIONS = ['pdf', 'docx', 'pptx', 'png', 'jpg', 'jpeg'];
+
+/** An ISO timestamp as the "YYYY-MM-DDTHH:mm" text a datetime-local input expects (local time). */
+function toLocalInput(iso: string | null | undefined): string {
+  if (!iso) return '';
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return '';
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
 
 @Component({
   selector: 'app-classwork-item-dialog',
@@ -49,20 +57,21 @@ export class ClassworkItemDialogComponent {
   private readonly dialogRef =
     inject<MatDialogRef<ClassworkItemDialogComponent, ClassworkDialogResult>>(MatDialogRef);
   private readonly fb = inject(FormBuilder);
-  private selectedFile: File | null = null;
 
   protected readonly acceptAttr = ALLOWED_EXTENSIONS.map((e) => '.' + e).join(',');
 
-  protected readonly fileName = signal<string | null>(
-    this.data.item?.attachmentPath ? displayNameFromPath(this.data.item.attachmentPath) : null,
-  );
+  // Files already on the item (shown with a Remove button) and files picked in this dialog.
+  protected readonly existingFiles = signal<ClassworkFile[]>(this.data.item?.files ?? []);
+  protected readonly newFiles = signal<File[]>([]);
+  private removedFileIds: string[] = [];
+
   protected readonly fileError = signal<string | null>(null);
   protected readonly linkError = signal<string | null>(null);
 
   protected readonly form = this.fb.nonNullable.group({
     title: [this.data.item?.title ?? this.data.initialTitle ?? '', Validators.required],
     details: [this.data.item?.details ?? ''],
-    dueAt: [this.data.item?.dueAt ?? ''],
+    dueAt: [toLocalInput(this.data.item?.dueAt)],
     points: [this.data.item?.points ?? 100, Validators.min(0)],
     linkUrl: [this.data.item?.linkUrl ?? ''],
   });
@@ -72,27 +81,34 @@ export class ClassworkItemDialogComponent {
     return `${editing ? 'Edit' : 'Add'} ${this.data.kind.toLowerCase()}`;
   }
 
-  protected onFileSelected(event: Event): void {
+  protected onFilesSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
-    const file = input.files?.item(0) ?? null;
+    const picked = Array.from(input.files ?? []);
     input.value = '';
-    if (!file) {
-      return;
-    }
 
-    const ext = file.name.split('.').pop()?.toLowerCase() ?? '';
-    if (!ALLOWED_EXTENSIONS.includes(ext)) {
-      this.fileError.set('Allowed files: PDF, Word, PowerPoint, Excel, TXT, PNG, JPG, ZIP.');
-      return;
+    let error: string | null = null;
+    const accepted: File[] = [];
+    for (const file of picked) {
+      const ext = file.name.split('.').pop()?.toLowerCase() ?? '';
+      if (!ALLOWED_EXTENSIONS.includes(ext)) {
+        error = 'Allowed files: PDF, Word (.docx), PowerPoint (.pptx), PNG, JPG.';
+      } else if (file.size > MAX_FILE_BYTES) {
+        error = `"${file.name}" is over 10 MB.`;
+      } else if (!this.newFiles().some((f) => f.name === file.name && f.size === file.size)) {
+        accepted.push(file);
+      }
     }
-    if (file.size > MAX_FILE_BYTES) {
-      this.fileError.set('Choose a file smaller than 50 MB.');
-      return;
-    }
+    this.fileError.set(error);
+    if (accepted.length) this.newFiles.update((list) => [...list, ...accepted]);
+  }
 
-    this.fileError.set(null);
-    this.selectedFile = file;
-    this.fileName.set(file.name);
+  protected removeNew(index: number): void {
+    this.newFiles.update((list) => list.filter((_, i) => i !== index));
+  }
+
+  protected removeExisting(file: ClassworkFile): void {
+    this.removedFileIds.push(file.id);
+    this.existingFiles.update((list) => list.filter((f) => f.id !== file.id));
   }
 
   // Returns a clean https URL, '' if empty, or null if invalid
@@ -129,9 +145,10 @@ export class ClassworkItemDialogComponent {
     this.dialogRef.close({
       title: value.title.trim(),
       details: value.details.trim(),
-      dueAt: value.dueAt === '' ? null : value.dueAt,
+      dueAt: value.dueAt === '' ? null : new Date(value.dueAt).toISOString(),
       points: value.points,
-      file: this.selectedFile,
+      files: this.newFiles(),
+      removedFileIds: this.removedFileIds,
       linkUrl,
     });
   }

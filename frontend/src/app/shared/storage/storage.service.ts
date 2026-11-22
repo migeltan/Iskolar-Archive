@@ -14,7 +14,9 @@ export class StorageService {
   private readonly supabase = inject(SUPABASE_CLIENT);
 
   async uploadMaterial(sectionId: string, file: File): Promise<string> {
-    const path = `${sectionId}/${Date.now()}_${file.name}`;
+    // Spaces and symbols in a storage key can be rejected, so keep the key plain.
+    const safeName = file.name.replace(/[^\w.-]+/g, '_');
+    const path = `${sectionId}/${Date.now()}_${safeName}`;
     const { error } = await this.supabase.storage.from('materials').upload(path, file);
     if (error) {
       throw error;
@@ -30,6 +32,12 @@ export class StorageService {
       throw error;
     }
     return data.signedUrl;
+  }
+
+  /** Best effort: a file that cannot be removed only wastes space, so errors are ignored. */
+  async removeMaterials(paths: string[]): Promise<void> {
+    if (paths.length === 0) return;
+    await this.supabase.storage.from('materials').remove(paths);
   }
 
   async uploadCourseCover(courseId: string, file: File): Promise<string> {

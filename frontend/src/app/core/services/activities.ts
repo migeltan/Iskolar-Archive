@@ -1,53 +1,52 @@
-import { Injectable } from '@angular/core';
-import { Observable, of, delay } from 'rxjs';
+import { Injectable, inject } from '@angular/core';
+import { Observable, defer, from } from 'rxjs';
+import { SUPABASE_CLIENT } from '../../shared/storage/storage.service';
 import { Activity, NewActivity } from '../models/classwork.models';
 
+/** Activities straight from the database (the student screens and the gradebook use this). */
 @Injectable({ providedIn: 'root' })
 export class Activities {
-  private data: Activity[] = [
-    {
-      id: 'activity-1',
-      section_id: 'section-1',
-      title: 'Activity 1: Intro Essay',
-      instructions: 'Write a one-page essay about your goals.',
-      points: 100,
-      due_at: '2026-11-12T23:59:00Z',
-      form_url: null,
-      created_at: new Date().toISOString(),
-    },
-    
-    {
-      id: 'activity-2',
-      section_id: 'section-1',
-      title: 'Activity 2: Reflection',
-      instructions: 'Write a short reflection about our first week.',
-      points: 50,
-      due_at: '2026-11-05T23:59:00Z',
-      form_url: null,
-      created_at: new Date().toISOString(),
-    },
-  ];
+  private readonly supabase = inject(SUPABASE_CLIENT);
 
   listBySection(sectionId: string): Observable<Activity[]> {
-    return of(this.data.filter((a) => a.section_id === sectionId)).pipe(delay(200));
+    return defer(() => from(this.fetchBySection(sectionId)));
   }
 
   getById(id: string): Observable<Activity | undefined> {
-    return of(this.data.find((a) => a.id === id)).pipe(delay(200));
+    return defer(() => from(this.fetchById(id)));
   }
 
   create(input: NewActivity): Observable<Activity> {
-    const activity: Activity = {
-      id: crypto.randomUUID(),
-      section_id: input.section_id,
-      title: input.title,
-      instructions: input.instructions ?? null,
-      points: input.points ?? 100,
-      due_at: input.due_at ?? null,
-      form_url: input.form_url ?? null,
-      created_at: new Date().toISOString(),
-    };
-    this.data = [activity, ...this.data];
-    return of(activity).pipe(delay(200));
+    return defer(() => from(this.insert(input)));
+  }
+
+  private async fetchBySection(sectionId: string): Promise<Activity[]> {
+    const { data, error } = await this.supabase
+      .from('activities')
+      .select('*')
+      .eq('section_id', sectionId)
+      .order('created_at', { ascending: false });
+    if (error) throw error;
+    return data as unknown as Activity[];
+  }
+
+  private async fetchById(id: string): Promise<Activity | undefined> {
+    const { data, error } = await this.supabase
+      .from('activities')
+      .select('*')
+      .eq('id', id)
+      .maybeSingle();
+    if (error) throw error;
+    return (data as unknown as Activity | null) ?? undefined;
+  }
+
+  private async insert(input: NewActivity): Promise<Activity> {
+    const { data, error } = await this.supabase
+      .from('activities')
+      .insert(input)
+      .select('*')
+      .single();
+    if (error) throw error;
+    return data as unknown as Activity;
   }
 }

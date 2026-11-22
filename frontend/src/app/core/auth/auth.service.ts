@@ -13,8 +13,13 @@ export interface Profile {
   created_at?: string;
   avatar_url?: string | null;
 }
+/** Sign-in refused on purpose (pending approval, suspended). The message is safe to show. */
+export class AccountBlockedError extends Error {}
+
 @Injectable({ providedIn: 'root' })
 export class AuthService {
+  /** Why the last profile load refused the account (read once via takeBlockReason). */
+  private blocked: 'pending' | 'suspended' | null = null;
   // Real Supabase auth by default. Set `useMockAuth: true` in an environment file
   // (locally, do not commit) to sign in offline with fake accounts.
   private readonly supabase = environment.useMockAuth
@@ -41,11 +46,60 @@ export class AuthService {
     const { data, error } = await this.supabase.auth.signInWithPassword({ email, password });
     if (error) throw error;
 
+    this.takeBlockReason();
     await this.loadProfile(data.user.id);
     if (!this.profile()) {
       await this.supabase.auth.signOut();
+      const reason = this.takeBlockReason();
+      if (reason === 'pending') {
+        throw new AccountBlockedError(
+          'Your teacher account is waiting for admin approval. You can sign in once it is approved.',
+        );
+      }
+      if (reason === 'suspended') {
+        throw new AccountBlockedError('This account is suspended. Contact an admin.');
+      }
       throw new Error('This account has no active profile.');
     }
+  }
+
+  /**
+   * Creates an account. The database trigger only accepts school domains and makes the
+   * profile (student; @pup.edu.ph staff start as pending_teacher until an admin approves).
+   * 'ok' = signed in, 'pending' = created but waiting for approval,
+   * 'confirm-email' = Supabase wants the email confirmed first.
+   */
+  async signUp(
+    fullName: string,
+    email: string,
+    password: string,
+  ): Promise<'ok' | 'pending' | 'confirm-email'> {
+    if (!this.supabase) throw new Error('Creating an account needs real sign-in.');
+    const { data, error } = await this.supabase.auth.signUp({
+      email,
+      password,
+      options: { data: { full_name: fullName.trim() } },
+    });
+    if (error) throw error;
+    // With email confirmation on, an existing address comes back with no identities.
+    if (data.user && data.user.identities?.length === 0) {
+      throw new Error('User already registered');
+    }
+    if (!data.session) return 'confirm-email';
+
+    this.takeBlockReason();
+    await this.loadProfile(data.user!.id);
+    if (this.profile()) return 'ok';
+    if (this.takeBlockReason() === 'pending') return 'pending';
+    throw new Error(
+      'Your account was created but its profile could not be loaded. Try signing in.',
+    );
+  }
+
+  private takeBlockReason(): 'pending' | 'suspended' | null {
+    const reason = this.blocked;
+    this.blocked = null;
+    return reason;
   }
 
   async signOut(): Promise<void> {
@@ -177,7 +231,8 @@ export class AuthService {
       this.profile.set(null);
       return;
     }
-    if (data.status === 'suspended') {
+    if (data.status === 'suspended' || data.status === 'pending_teacher') {
+      this.blocked = data.status === 'suspended' ? 'suspended' : 'pending';
       await this.supabase.auth.signOut();
       this.profile.set(null);
       return;

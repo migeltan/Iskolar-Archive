@@ -86,3 +86,36 @@ $accent: #f4847b;
     color: $accent !important;
   }
 }
+
+.file-list {
+  margin: 8px 0 12px;
+  padding: 0;
+  list-style: none;
+
+  li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 6px 0;
+    border-bottom: 1px solid #eee;
+  }
+}
+
+.file-list__name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.file-list__remove {
+  flex-shrink: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #8a1c1c;
+  font: inherit;
+  font-size: 0.8rem;
+  text-decoration: underline;
+  cursor: pointer;
+}
