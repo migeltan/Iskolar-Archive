@@ -1,16 +1,21 @@
 .page {
   max-width: 1100px;
   margin: 0 auto;
-  padding: 24px;
+  // No padding here: the shell's .content already adds it (it was doubled before).
 }
 
+// Header band: framed, with a maroon accent on the left.
 .page-header {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: 16px;
   flex-wrap: wrap;
-  margin-bottom: 24px;
+  margin-bottom: 20px;
+  padding: 18px 24px;
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: 12px;
+  background: #fff;
 
   h1 {
     margin: 0;
@@ -21,6 +26,53 @@
 .subtitle {
   margin: 4px 0 0;
   color: var(--mat-sys-on-surface-variant);
+}
+
+// ---------- Ruled panel ----------
+.panel {
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: 12px;
+  background: #fff;
+}
+
+.panel-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 24px;
+  border-bottom: 1px solid var(--mat-sys-outline-variant);
+
+  h2 {
+    margin: 0;
+    font: var(--mat-sys-title-medium);
+  }
+}
+
+.count {
+  min-width: 24px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #800000;
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+// Faint maroon grid lines behind the cards.
+.panel .classes {
+  padding: 24px;
+  border-radius: 0 0 12px 12px;
+  background-image:
+    linear-gradient(rgba(128, 0, 0, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(128, 0, 0, 0.05) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+@media (max-width: 600px) {
+  .panel .classes {
+    padding: 16px;
+  }
 }
 
 // ---------- Class cards ----------
@@ -76,7 +128,9 @@
 }
 
 .class-card[data-pattern='1'] .banner {
-  background-size: 18px 18px, auto;
+  background-size:
+    18px 18px,
+    auto;
   background-image:
     radial-gradient(rgba(255, 255, 255, 0.2) 2px, transparent 2.5px),
     linear-gradient(135deg, var(--c1), var(--c2));
@@ -90,7 +144,10 @@
 }
 
 .class-card[data-pattern='3'] .banner {
-  background-size: 22px 22px, 22px 22px, auto;
+  background-size:
+    22px 22px,
+    22px 22px,
+    auto;
   background-image:
     linear-gradient(rgba(255, 255, 255, 0.09) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255, 255, 255, 0.09) 1px, transparent 1px),
@@ -113,7 +170,7 @@
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
-    line-clamp: 2;
+  line-clamp: 2;
   overflow: hidden;
   transition: font-size 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -228,6 +285,13 @@
   gap: 8px;
   padding: 64px 16px;
   text-align: center;
+}
+
+// Framed empty state
+.empty {
+  border: 2px dashed var(--mat-sys-outline-variant);
+  border-radius: 12px;
+  background: #fff;
 }
 
 .empty h2 {

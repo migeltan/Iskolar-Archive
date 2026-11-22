@@ -1,0 +1,126 @@
+<div class="page">
+  <header class="header">
+    <h1>Settings</h1>
+    <p class="subtitle">Manage your profile and sign-in.</p>
+  </header>
+
+  @if (auth.profile(); as p) {
+    <section class="panel">
+      <h2>Profile</h2>
+      <div class="identity">
+        <span class="avatar">
+          @if (p.avatar_url) {
+            <img [src]="p.avatar_url" alt="Your profile picture" />
+          } @else {
+            {{ initial() }}
+          }
+        </span>
+        <div class="identity-text">
+          <strong>{{ p.full_name || p.email }}</strong>
+          <span class="muted">{{ p.email }}</span>
+          <div class="avatar-actions">
+            <input
+              #picker
+              type="file"
+              accept="image/png,image/jpeg,image/webp"
+              hidden
+              (change)="onAvatarPicked($event)"
+            />
+            <button
+              mat-stroked-button
+              type="button"
+              [disabled]="avatarBusy()"
+              (click)="picker.click()"
+            >
+              Change photo
+            </button>
+            @if (p.avatar_url) {
+              <button mat-button type="button" [disabled]="avatarBusy()" (click)="removeAvatar()">
+                Remove
+              </button>
+            }
+            @if (avatarMsg(); as m) {
+              <span class="msg" [class.err]="!m.ok">{{ m.text }}</span>
+            }
+          </div>
+        </div>
+      </div>
+
+      <dl class="facts">
+        <div>
+          <dt>Email</dt>
+          <dd>{{ p.email }}</dd>
+        </div>
+        <div>
+          <dt>Role</dt>
+          <dd class="cap">{{ p.role }}</dd>
+        </div>
+        <div>
+          <dt>Status</dt>
+          <dd class="cap">{{ p.status }}</dd>
+        </div>
+        @if (p.created_at) {
+          <div>
+            <dt>Joined</dt>
+            <dd>{{ p.created_at | date: 'mediumDate' }}</dd>
+          </div>
+        }
+      </dl>
+
+      <form class="form" (ngSubmit)="saveName()">
+        <mat-form-field appearance="outline">
+          <mat-label>Full name</mat-label>
+          <input
+            matInput
+            name="fullName"
+            maxlength="80"
+            [ngModel]="fullName()"
+            (ngModelChange)="fullName.set($event)"
+          />
+        </mat-form-field>
+        <div class="actions">
+          <button mat-flat-button type="submit" [disabled]="nameBusy()">Save name</button>
+          @if (nameMsg(); as m) {
+            <span class="msg" [class.err]="!m.ok">{{ m.text }}</span>
+          }
+        </div>
+      </form>
+    </section>
+
+    @if (canChangePassword) {
+      <section class="panel">
+        <h2>Change password</h2>
+        <form class="form" (ngSubmit)="savePassword()">
+          <mat-form-field appearance="outline">
+            <mat-label>New password</mat-label>
+            <input
+              matInput
+              type="password"
+              name="newPassword"
+              autocomplete="new-password"
+              [ngModel]="newPassword()"
+              (ngModelChange)="newPassword.set($event)"
+            />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Confirm new password</mat-label>
+            <input
+              matInput
+              type="password"
+              name="confirmPassword"
+              autocomplete="new-password"
+              [ngModel]="confirmPassword()"
+              (ngModelChange)="confirmPassword.set($event)"
+            />
+          </mat-form-field>
+          <div class="actions">
+            <button mat-flat-button type="submit" [disabled]="pwBusy()">Change password</button>
+            @if (pwMsg(); as m) {
+              <span class="msg" [class.err]="!m.ok">{{ m.text }}</span>
+            }
+          </div>
+        </form>
+      </section>
+    }
+  }
+</div>

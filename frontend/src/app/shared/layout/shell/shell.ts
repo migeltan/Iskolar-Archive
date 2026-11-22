@@ -29,6 +29,7 @@ export class Shell {
     () => this.auth.profile()?.full_name || this.auth.profile()?.email || 'User',
   );
   initial = computed(() => this.displayName().charAt(0).toUpperCase());
+  avatarUrl = computed(() => this.auth.profile()?.avatar_url ?? null);
 
   toggle() {
     this.open.update((v) => !v);
@@ -40,12 +41,20 @@ export class Shell {
    */
   onRailClick(event: MouseEvent) {
     const target = event.target as HTMLElement;
+    // Picking a page from the sidebar closes it (on every screen size).
     if (target.closest('a')) {
-      this.closeOnMobile();
+      this.open.set(false);
       return;
     }
     if (target.closest('button, .disabled')) return;
     this.toggle();
+  }
+
+  /** Clicking anywhere in the page closes an open sidebar (the phone menu button is excluded). */
+  onMainClick(event: MouseEvent) {
+    if (!this.open()) return;
+    if ((event.target as HTMLElement).closest('.mobile-bar')) return;
+    this.open.set(false);
   }
 
   /** On phones the sidebar is a drawer, so close it after picking a page. */

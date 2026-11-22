@@ -9,13 +9,28 @@ export const authGuard: CanActivateFn = async () => {
   return auth.isLoggedIn() ? true : router.parseUrl('/login');
 };
 
-export const roleGuard = (...allowed: Role[]): CanActivateFn => async () => {
+/** Each role's home: students on their dashboard, teachers on their courses, admins on /admin. */
+export function homeFor(role: Role | null): string {
+  if (role === 'teacher') return '/courses';
+  if (role === 'admin') return '/admin';
+  return '/dashboard';
+}
+
+/** For the empty path ("/"): sends each signed-in user to their own home. */
+export const homeGuard: CanActivateFn = async () => {
   const auth = inject(AuthService);
   const router = inject(Router);
   await auth.ready;
-  if (!auth.isLoggedIn()) return router.parseUrl('/login');
-  const role = auth.role();
-  return role && allowed.includes(role)
-    ? true
-    : router.parseUrl('/dashboard');
+  return router.parseUrl(auth.isLoggedIn() ? homeFor(auth.role()) : '/login');
 };
+
+export const roleGuard =
+  (...allowed: Role[]): CanActivateFn =>
+  async () => {
+    const auth = inject(AuthService);
+    const router = inject(Router);
+    await auth.ready;
+    if (!auth.isLoggedIn()) return router.parseUrl('/login');
+    const role = auth.role();
+    return role && allowed.includes(role) ? true : router.parseUrl(homeFor(role));
+  };

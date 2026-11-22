@@ -1,8 +1,19 @@
 <div class="page">
   <header class="page-header">
     <div>
-      <h1>My sections</h1>
-      <p class="subtitle">Click a section to see materials and activities.</p>
+      <h1>
+        Welcome back
+        @if (firstName()) {
+          , {{ firstName() }}
+        }
+      </h1>
+      <p class="subtitle">
+        @if (!loading() && sections().length === 0) {
+          Join your first section with a code from your teacher to get started.
+        } @else {
+          Pick a section below to see its materials and activities.
+        }
+      </p>
     </div>
     <button mat-flat-button type="button" (click)="openJoinDialog()">
       <mat-icon>add</mat-icon>
@@ -20,34 +31,38 @@
     </div>
   } @else {
     @if (sections().length > 0) {
-      <div class="classes">
-        @for (s of sections(); track s.id) {
-          <a
-            class="class-card"
-            [routerLink]="['/class', s.id]"
-            [style.--c1]="design(s.id).c1"
-            [style.--c2]="design(s.id).c2"
-            [attr.data-pattern]="design(s.id).pattern"
-          >
-            <div class="banner">
-              <h2 class="title">{{ s.course_title }}</h2>
-              <p class="meta">{{ s.name }}</p>
-            </div>
+      <section class="panel">
+        <div class="panel-head">
+          <h2>Enrolled sections</h2>
+          <span class="count">{{ sections().length }}</span>
+        </div>
+        <div class="classes">
+          @for (s of sections(); track s.id) {
+            <a
+              class="class-card"
+              [routerLink]="['/class', s.id]"
+              [style.--c1]="design(s.id).c1"
+              [style.--c2]="design(s.id).c2"
+              [attr.data-pattern]="design(s.id).pattern"
+            >
+              <div class="banner">
+                <h2 class="title">{{ s.course_title }}</h2>
+                <p class="meta">{{ s.name }}</p>
+              </div>
 
-            <div class="avatar" aria-hidden="true">{{ initials(s.course_code) }}</div>
+              <div class="avatar" aria-hidden="true">{{ initials(s.course_code) }}</div>
 
-            <div class="details">
-              <p class="line"><mat-icon>menu_book</mat-icon>{{ s.course_code }}</p>
-              @if (s.term) {
-                <p class="line"><mat-icon>event</mat-icon>{{ s.term }}</p>
-              }
-              <p class="line open-hint">
-                Open section <mat-icon>arrow_forward</mat-icon>
-              </p>
-            </div>
-          </a>
-        }
-      </div>
+              <div class="details">
+                <p class="line"><mat-icon>menu_book</mat-icon>{{ s.course_code }}</p>
+                @if (s.term) {
+                  <p class="line"><mat-icon>event</mat-icon>{{ s.term }}</p>
+                }
+                <p class="line open-hint">Open section <mat-icon>arrow_forward</mat-icon></p>
+              </div>
+            </a>
+          }
+        </div>
+      </section>
     } @else {
       <div class="center empty">
         <mat-icon class="big-icon empty-icon">school</mat-icon>

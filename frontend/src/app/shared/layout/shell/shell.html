@@ -16,16 +16,18 @@
     </div>
 
     <nav class="nav" aria-label="Main">
-      <a
-        class="item"
-        routerLink="/dashboard"
-        routerLinkActive="active"
-        [matTooltip]="open() ? '' : 'Dashboard'"
-        matTooltipPosition="right"
-      >
-        <mat-icon>space_dashboard</mat-icon>
-        <span class="label">Dashboard</span>
-      </a>
+      @if (auth.role() === 'student') {
+        <a
+          class="item"
+          routerLink="/dashboard"
+          routerLinkActive="active"
+          [matTooltip]="open() ? '' : 'Dashboard'"
+          matTooltipPosition="right"
+        >
+          <mat-icon>space_dashboard</mat-icon>
+          <span class="label">Dashboard</span>
+        </a>
+      }
 
       <app-enrolled-nav [collapsed]="!open()" />
 
@@ -56,13 +58,25 @@
     </nav>
 
     <div class="foot">
-      <div class="user" [matTooltip]="open() ? '' : displayName()" matTooltipPosition="right">
-        <span class="avatar">{{ initial() }}</span>
+      <a
+        class="user"
+        routerLink="/settings"
+        routerLinkActive="active"
+        [matTooltip]="open() ? '' : displayName() + ' (settings)'"
+        matTooltipPosition="right"
+      >
+        <span class="avatar">
+          @if (avatarUrl(); as url) {
+            <img [src]="url" alt="" />
+          } @else {
+            {{ initial() }}
+          }
+        </span>
         <span class="who label">
           <span class="name">{{ displayName() }}</span>
           <span class="role">{{ auth.role() }}</span>
         </span>
-      </div>
+      </a>
       <button
         type="button"
         class="item logout"
@@ -76,7 +90,7 @@
     </div>
   </aside>
 
-  <div class="main">
+  <div class="main" (click)="onMainClick($event)">
     <header class="mobile-bar">
       <button type="button" class="toggle" (click)="toggle()" aria-label="Open menu">
         <mat-icon>menu</mat-icon>

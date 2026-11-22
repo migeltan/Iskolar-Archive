@@ -46,9 +46,8 @@
     transition: background-color 0.2s ease;
   }
 
+  // Hover keeps the same maroon as the buttons (#800000); only the edge line lights up.
   &:hover {
-    background: #8a0a0a;
-
     &::after {
       background: rgba(255, 255, 255, 0.28);
     }
@@ -132,6 +131,15 @@
   gap: 12px;
   min-width: 0;
   padding: 4px;
+  border-radius: 12px;
+  color: inherit;
+  text-decoration: none;
+  transition: background-color 0.18s ease;
+
+  &:hover,
+  &.active {
+    background: rgba(255, 255, 255, 0.12);
+  }
 }
 
 .avatar {
@@ -145,6 +153,13 @@
   background: rgba(255, 255, 255, 0.14);
   color: #fff;
   font-weight: 600;
+  overflow: hidden;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
 }
 
 .who {

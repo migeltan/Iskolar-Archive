@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
@@ -23,6 +23,13 @@ export class Dashboard implements OnInit {
 
   sections = signal<MySection[]>([]);
   loading = signal(true);
+
+  /** First word of the user's name, for the welcome line. */
+  firstName = computed(() => {
+    const p = this.auth.profile();
+    const name = p?.full_name?.trim() || p?.email?.split('@')[0] || '';
+    return name.split(/\s+/)[0];
+  });
 
   ngOnInit(): void {
     this.load();
@@ -51,6 +58,11 @@ export class Dashboard implements OnInit {
 
   /** "INTE 301" -> "IN" */
   initials(code: string): string {
-    return code.replace(/[^A-Za-z]/g, '').slice(0, 2).toUpperCase() || '?';
+    return (
+      code
+        .replace(/[^A-Za-z]/g, '')
+        .slice(0, 2)
+        .toUpperCase() || '?'
+    );
   }
 }
