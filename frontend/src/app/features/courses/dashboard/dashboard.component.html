@@ -7,12 +7,8 @@
 
   <div class="topbar__user">
     <div class="topbar__identity">
-      <mat-slide-toggle [checked]="demoLoaded()" (change)="toggleDemo($event)">
-        Demo data
-      </mat-slide-toggle>
-
       <div class="user-stack">
-        <span class="topbar__name">{{ teacherFullName }}</span>
+        <span class="topbar__name">{{ fullName() }}</span>
         <button mat-stroked-button type="button" class="logout-btn" (click)="logout()">
           <img src="/assets/images/icon-logout.svg" alt="Logout" class="btn-icon" />
           <span>Log out</span>
@@ -24,7 +20,7 @@
 </header>
 
 <main class="dashboard">
-  <h1 class="dashboard__welcome">Welcome, Prof. {{ teacherLastName }}!</h1>
+  <h1 class="dashboard__welcome">{{ greeting() }}</h1>
 
   <section class="courses">
     <div class="courses__header">
@@ -37,7 +33,11 @@
       </button>
     </div>
 
-    @if (courses.length === 0) {
+    @if (loading()) {
+      <p class="courses__status">Loading your courses…</p>
+    } @else if (loadError(); as message) {
+      <p class="courses__status" role="alert">{{ message }}</p>
+    } @else if (courses().length === 0) {
       <div class="courses__empty">
         <p>
           You don't have any courses yet. To start creating classes and posting materials, you need
@@ -52,7 +52,7 @@
       </div>
     } @else {
       <div class="courses__grid">
-        @for (course of courses; track course.id) {
+        @for (course of courses(); track course.id) {
           <article class="course-card">
             <div class="course-card__cover" [style.background]="coverFor(course)">
               <h3 class="course-card__title">{{ course.title }}</h3>

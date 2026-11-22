@@ -1,14 +1,19 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatListModule } from '@angular/material/list';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { ActivatedRoute, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
-import { findSectionById } from '../../../shared/mock/lms-mock-data';
+import {
+  ActivatedRoute,
+  Router,
+  RouterLink,
+  RouterLinkActive,
+  RouterOutlet,
+} from '@angular/router';
+import { AuthService } from '../../../core/auth/auth.service';
+import { CoursesService } from '../../../core/services/courses';
 import { Section } from '../../../shared/models/lms.models';
-import { Router } from '@angular/router'; 
-import { AuthService } from '../../../core/auth/auth.service'; 
 
 const MAX_IMAGE_BYTES = 2 * 1024 * 1024; // 2 MB
 const IMAGE_TYPES = ['image/png', 'image/jpeg', 'image/webp'];
@@ -29,22 +34,22 @@ const DEFAULT_AVATAR = 'assets/images/default-avatar.svg';
   templateUrl: './section-layout.component.html',
   styleUrl: './section-layout.component.scss',
 })
-export class SectionLayoutComponent {
+export class SectionLayoutComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly snackBar = inject(MatSnackBar);
+  private readonly router = inject(Router);
+  private readonly coursesApi = inject(CoursesService);
+  protected readonly auth = inject(AuthService);
 
-  private readonly router = inject(Router); // Add this
-  protected readonly auth = inject(AuthService); // Add this
+  protected readonly teacherName = computed(() => {
+    const profile = this.auth.profile();
+    return profile?.full_name?.trim() || profile?.email || '';
+  });
 
-  protected logout(): void {
-    this.auth.signOut();
-    this.router.navigate(['/login']);
-  }
-
-  protected readonly teacherFullName = 'Maria Santos';
+  protected readonly avatarSrc = computed(() => this.auth.profile()?.avatar_url || DEFAULT_AVATAR);
 
   protected readonly sectionId = this.route.snapshot.paramMap.get('id') ?? '';
-  protected readonly section: Section | undefined = findSectionById(this.sectionId);
+  protected readonly section = signal<Section | undefined>(undefined);
 
   protected readonly navItems = [
     { label: 'Stream', path: 'stream', icon: 'assets/images/icon-stream.svg' },
@@ -53,7 +58,17 @@ export class SectionLayoutComponent {
     { label: 'People', path: 'people', icon: 'assets/images/icon-people.svg' },
   ];
 
+  ngOnInit(): void {
+    void this.loadSection();
+  }
+
+  protected async logout(): Promise<void> {
+    await this.auth.signOut();
+    await this.router.navigate(['/login']);
+  }
+
   // ---------- COVER IMAGE (null = default gradient) ----------
+  // Still stored in this browser only; a real cover needs a database column.
   private readonly coverKey = `section-cover:${this.sectionId}`;
   protected readonly cover = signal<string | null>(this.read(this.coverKey));
 
@@ -73,21 +88,15 @@ export class SectionLayoutComponent {
     this.remove(this.coverKey);
   }
 
-  // ---------- PROFILE PHOTO (null = default avatar) ----------
-  private readonly avatarKey = 'teacher-avatar';
-  protected readonly avatar = signal<string | null>(this.read(this.avatarKey));
-  protected readonly avatarSrc = computed(() => this.avatar() ?? DEFAULT_AVATAR);
-
-  protected onAvatarSelected(event: Event): void {
-    this.pickImage(event, this.avatarKey, (url) => this.avatar.set(url));
-  }
-
-  protected resetAvatar(): void {
-    this.avatar.set(null);
-    this.remove(this.avatarKey);
-  }
-
   // ---------- helpers ----------
+  private async loadSection(): Promise<void> {
+    try {
+      this.section.set(await this.coursesApi.getSection(this.sectionId));
+    } catch {
+      this.section.set(undefined);
+    }
+  }
+
   private pickImage(event: Event, storageKey: string, apply: (dataUrl: string) => void): void {
     const input = event.target as HTMLInputElement;
     const file = input.files?.item(0) ?? null;

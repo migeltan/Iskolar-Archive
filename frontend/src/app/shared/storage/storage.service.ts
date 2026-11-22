@@ -33,7 +33,8 @@ export class StorageService {
   }
 
   async uploadCourseCover(courseId: string, file: File): Promise<string> {
-    const path = `${courseId}/${Date.now()}_${file.name}`;
+    const safeName = file.name.replace(/[^\w.-]+/g, '_');
+    const path = `${courseId}/${Date.now()}_${safeName}`;
     const { error } = await this.supabase.storage.from('course-covers').upload(path, file);
     if (error) {
       throw error;

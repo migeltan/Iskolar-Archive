@@ -1,13 +1,19 @@
 <section class="people">
-  @if (!demoLoaded()) {
+  @if (loading()) {
+    <p class="people__empty">Loading students…</p>
+  } @else if (loadError(); as message) {
+    <p class="people__empty" role="alert">{{ message }}</p>
+  } @else if (students().length === 0) {
     <p class="people__empty">
       No students have joined yet. Share the Section Code:
-      <strong>{{ sectionCode }}</strong> with your class.
+      <strong>{{ sectionCode() }}</strong> with your class.
     </p>
   } @else {
     <header class="people__head">
       <h2 class="people__title">Classmates</h2>
-      <span class="people__count">{{ sortedStudents().length }} students</span>
+      <span class="people__count">
+        {{ sortedStudents().length === 1 ? '1 student' : sortedStudents().length + ' students' }}
+      </span>
     </header>
 
     <div class="people__toolbar">
@@ -25,13 +31,7 @@
           <span class="people__avatar" [style.background]="avatarColor(i)">
             {{ initials(student) }}
           </span>
-          <span class="people__name">
-            @if (sortBy() === 'lastName') {
-              {{ student.lastName }}, {{ student.firstName }}
-            } @else {
-              {{ student.firstName }} {{ student.lastName }}
-            }
-          </span>
+          <span class="people__name">{{ displayName(student) }}</span>
         </li>
       }
     </ul>

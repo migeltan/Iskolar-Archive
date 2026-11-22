@@ -1,12 +1,7 @@
 <div class="page">
   <header class="page-header">
     <div>
-      <h1>
-        Welcome back
-        @if (firstName()) {
-          , {{ firstName() }}
-        }
-      </h1>
+      <h1>Welcome back{{ firstName() ? ', ' + firstName() : '' }}</h1>
       <p class="subtitle">
         @if (!loading() && sections().length === 0) {
           Join your first section with a code from your teacher to get started.
