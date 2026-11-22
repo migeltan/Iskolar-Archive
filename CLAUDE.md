@@ -1,107 +1,78 @@
-# LMS-CCIS: context for Claude (Lead role only)
+LMS-CCIS: context for Claude (Lead role only)
+Read this briefly, then continue from Next. Do not re-ask decided items or re-inspect files this file already describes. Conserve tokens.
 
-Read this briefly, then continue from **Next**. Do not re-ask decided items or re-inspect files this file already describes. Conserve tokens.
-
-## Start here (every new conversation)
-
-1. Sync the clone (section 2). Read-only: no installs, no downloads.
-2. Run the **Verify** commands (section 5) to see what has landed on `main`.
-3. Reply with one short line: current state and what you will do next. Then work on **Next**.
-
+Start here (every new conversation)
+Sync the clone (section 2). Read-only: no installs, no downloads.
+Run the Verify commands (section 5) to see what has landed on main.
+Reply with one short line: current state and what you will do next. Then work on Next.
 Kickoff prompt: "Continue the LMS. Clone main, read /CLAUDE.md, verify status, continue from Next."
 
-## 1. How we work
+1. How we work
+   Scope: the Lead role only (Migel). You help with infrastructure and integration: repo, Supabase project config, hosting, environment files, Git workflow, docs, PR review, offline demo. Teammates' feature code (section 4, ownership) is out of scope unless he asks; if a task touches their folders, name the owner.
+   Phases: understand (no code) -> discuss (no code) -> implement only when he says "go" or "next". One step at a time, small. Present exact snippets grouped by file in implementation order: Replace this: (existing text, verbatim) then with this:. New file or heavy rewrite: exact path, one-line reason, full contents. No unrelated refactors.
+   He applies changes himself (Windows, PowerShell, VS Code, project at D:\Projects\pup-lms). Give PowerShell commands one per line (no &&). No output files unless he asks (CLAUDE.md is the exception: downloadable .md). Code goes in chat.
+   Match files by content. If a snippet cannot match, ask him to paste the file, then return it in full. If a change can break something before its supporting piece exists, order the steps so the risky change comes last.
+   State manual steps explicitly: commands, dashboard clicks, what to paste where, env values, redirect URLs.
+   Cannot run Angular, Supabase, Docker or a browser here. Verify by applying each snippet to a scratch copy with an exact-match script (each "Replace this" must match once) and by parsing JSON/TOML/YAML. Say "syntax-checked" vs "not run". He runs npm start, ng build, npx supabase ... and sends output or screenshots.
+   Never ask for or paste secrets (service_role key, Google client secret, DB password). The Supabase project URL and anon key are fine.
+   Tokens: grep -n, sed -n ranges only; never cat big files. Concise replies, at most one question per reply (prefer a stated default). Be direct; flag risks and unverified guesses honestly.
+   Windows gotchas: never Move-Item a project across drives (it split this repo once); if ng is blocked, Set-ExecutionPolicy -Scope CurrentUser RemoteSigned; npm 11 prints harmless allow-scripts warnings; never run npm audit fix --force.
+2. Seeing the code
+   mkdir -p /home/claude/lms && cd /home/claude/lms
+   [ -d repo ] || git clone --depth 1 https://github.com/migeltan/CCIS-LMS.git repo
+   cd repo && git fetch --depth 15 origin main && git reset --hard FETCH_HEAD && git log --oneline -5
+   Read-only reference; never push. It shows only what is pushed to main; his local copy is often ahead (treat unpushed work as intentional). If the clone fails (private repo or different URL), ask him for the exact URL; do not guess.
+   Never run npm install, npm ci or pip install. Ignore node_modules and package-lock.json.
+3. Project
+   Classroom/Canvas-style LMS for CCIS, PUP. School project for Systems Integration and Architecture, but it must be actually usable by about 50 students plus the professor, on a free stack. Team of 5 (3rd years). Deadline: Nov 11, 2026. Full plan: docs/Project_Plan.md (source of truth for roles, timeline, flowcharts, ERD; do not re-read it in full, grep a section).
 
-- **Scope: the Lead role only** (Migel). You help with infrastructure and integration: repo, Supabase project config, hosting, environment files, Git workflow, docs, PR review, offline demo. Teammates' feature code (section 4, ownership) is out of scope unless he asks; if a task touches their folders, name the owner.
-- **Phases:** understand (no code) -> discuss (no code) -> implement only when he says "go" or "next". **One step at a time, small.** Present exact snippets grouped by file in implementation order: `Replace this:` (existing text, verbatim) then `with this:`. New file or heavy rewrite: exact path, one-line reason, full contents. No unrelated refactors.
-- **He applies changes himself** (Windows, PowerShell, VS Code, project at `D:\Projects\pup-lms`). Give PowerShell commands one per line (no `&&`). No output files unless he asks (CLAUDE.md is the exception: downloadable `.md`). Code goes in chat.
-- Match files by content. If a snippet cannot match, ask him to paste the file, then return it in full. If a change can break something before its supporting piece exists, order the steps so the risky change comes last.
-- State manual steps explicitly: commands, dashboard clicks, what to paste where, env values, redirect URLs.
-- **Cannot run Angular, Supabase, Docker or a browser here.** Verify by applying each snippet to a scratch copy with an exact-match script (each "Replace this" must match once) and by parsing JSON/TOML/YAML. Say "syntax-checked" vs "not run". He runs `npm start`, `ng build`, `npx supabase ...` and sends output or screenshots.
-- **Never ask for or paste secrets** (service_role key, Google client secret, DB password). The Supabase project URL and anon key are fine.
-- **Tokens:** `grep -n`, `sed -n` ranges only; never cat big files. Concise replies, at most one question per reply (prefer a stated default). Be direct; flag risks and unverified guesses honestly.
-- Windows gotchas: never `Move-Item` a project across drives (it split this repo once); if `ng` is blocked, `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`; npm 11 prints harmless `allow-scripts` warnings; never run `npm audit fix --force`.
+Goal: teachers take courses and handle sections; they post announcements, upload materials (PDF/PPT/links) and create activities; students join a section with a code, see the stream, materials and activities, submit work and see grades. Quizzes are Google Form links. Admin approves teachers. Must also run offline for the demo.
 
-## 2. Seeing the code
+# Role Side
 
-```bash
-mkdir -p /home/claude/lms && cd /home/claude/lms
-[ -d repo ] || git clone --depth 1 https://github.com/migeltan/CCIS-LMS.git repo
-cd repo && git fetch --depth 15 origin main && git reset --hard FETCH_HEAD && git log --oneline -5
-```
+1 Lead / DevOps / Integration (Migel, this file) repo, hosting, config, reviews
+2 Database / Supabase backend: migrations, RLS, functions, seed
+3 Auth / Admin / App shell frontend core, login, guards, layout
+4 Teacher side courses, sections, stream, materials
+5 Student side + activities dashboard, activities, submissions, grades
 
-- Read-only reference; never push. It shows only what is **pushed to `main`**; his local copy is often ahead (treat unpushed work as intentional). If the clone fails (private repo or different URL), ask him for the exact URL; do not guess.
-- Never run `npm install`, `npm ci` or `pip install`. Ignore `node_modules` and `package-lock.json`.
+4. Decisions / rules already made (do not re-ask)
+   Stack: Angular (standalone, new app.ts/app.html file naming) + Angular Material; Supabase (Postgres, Auth, Storage, RLS); no separate backend server (Laravel dropped: free PHP hosting is weak). Custom logic = Postgres RPC or Edge Functions. Hosting: Cloudflare Pages or Vercel (pick one at A5), auto-deploy main. Offline demo = Docker + local Supabase + built Angular on one laptop; designed now, tested Nov 8-9; Google sign-in needs internet, so offline uses seeded email/password.
+   Repo layout: frontend/ Angular, backend/ Supabase CLI project, docs/, .github/. All schema changes are migration files in backend/supabase/migrations/; never click schema in the dashboard, never edit an applied migration.
+   Auth: Google sign-in plus email fallback; only @iskolarngbayan.pup.edu.ph (also enforced by a DB trigger); teacher domain unconfirmed and may differ. Default role student; admin approves teacher. Role checks in both Angular guards and RLS.
+   Secrets: project URL and anon key are committed in frontend/src/environments/ (RLS protects data). Never commit service_role, Google client secret or DB password.
+   Git: main protected (PR + 1 review); short-lived branches feat/<area>-<task>, fix/, db/; squash merge; no shared feat branch, no dev branch; after the Nov 7 freeze only fix/ PRs. Branches live at most 2 days.
+   Ownership (Lead's files): .github/ (CODEOWNERS, PR template), docs/, root README.md, frontend/angular.json, frontend/src/environments/, backend/package.json, backend/supabase/config.toml, hosting settings. Others stay in their own folders; DB person regenerates frontend/src/app/core/models/database.types.ts; frontend codes against mock services until schema v1 (target Oct 30).
+   Setup was split: Lead does Part A of the plan, teammates then clone, npm install, npm start.
 
-## 3. Project
+5. Where things are and status
+   Project display name is now "Iskolar Archive" (was "PUP Classroom"); repo is still migeltan/CCIS-LMS, local folder pup-lms/.
+   frontend/ Angular app (src/app, src/environments, public/assets/images, vercel.json, angular.json)
+   backend/ Supabase CLI (supabase/config.toml, seed.sql, migrations/)
+   docs/ Project_Plan.md
+   README.md, CLAUDE.md
+   On main as of Nov 22 (HEAD 797a948): migrations init_schema, storage_buckets (Oct 28), schema_v1, rls_policies, rpc_functions, storage_policies (Nov 6), signup_profile_and_domain (Nov 16); real supabaseUrl in environment.ts; frontend/vercel.json SPA rewrite (PR #12 chore/hosting); features pushed: login, shell/sidebar, student dashboard + enrolled nav + join-section dialog, teacher courses, stream, section pages (classwork, people, submissions, grades), gradebook, my-grades, admin-users. .github/ is NOT on main (no PR template or CODEOWNERS pushed).
+   Current phase (Nov 22): UI polish pass, one screen at a time. Delivered, waiting for him to apply and send a screenshot (not run here): landing/login redesign (split layout, left 3-slide crossfade slideshow with dots, right sign-in; mobile hides the slideshow) and the rename in index.html <title> and shell.html toolbar. Files: frontend/src/app/features/auth/login/{login.ts,login.html,login.scss} (full rewrites, MatCardModule dropped), frontend/src/index.html, frontend/src/app/shared/layout/shell/shell.html. Slides use gradient placeholders; slides array and bg values live in login.ts.
+   Verify (run in the clone):
 
-Classroom/Canvas-style LMS for CCIS, PUP. School project for Systems Integration and Architecture, but it must be **actually usable by about 50 students plus the professor, on a free stack**. Team of 5 (3rd years). **Deadline: Nov 11, 2026.** Full plan: `docs/Project_Plan.md` (source of truth for roles, timeline, flowcharts, ERD; do not re-read it in full, grep a section).
+cd /home/claude/lms/repo && git log --oneline -5
+ls frontend/src/environments backend/supabase/migrations
+grep -rn "Iskolar Archive\|PUP Classroom" frontend/src
+ls .github docs 2>/dev/null
+Gotchas: Angular files in app/ use app.component.ts (root) but features use login.ts/login.html style; login/shell files belong to role 3 (Auth/App shell), tell that owner before he pushes to avoid conflicts; real photos go in frontend/public/assets/images/ and are referenced as url('/assets/images/<file>').
 
-**Goal:** teachers take courses and handle sections; they post announcements, upload materials (PDF/PPT/links) and create activities; students join a section with a code, see the stream, materials and activities, submit work and see grades. Quizzes are Google Form links. Admin approves teachers. Must also run offline for the demo.
+6. Next (one at a time; say "go" before each)
+   UI pass: (1) he applies the login snippets, runs npm start, sends a screenshot; fix any regression precisely. (2) Swap the 3 gradient placeholders for real PUP campus photos (he supplies files and names). (3) He picks the next screen (shell/sidebar, dashboard, course and section pages, admin) and says go; deliver snippets, then update this file.
+   Leftovers: .github (PR template, CODEOWNERS with teammates' usernames); confirm branch protection actually enforced; confirm the Vercel deployed URL and its Supabase Site URL/redirect URLs; real Google OAuth (login.ts google() comment says mock); offline demo (Docker + local Supabase + environment.local.ts) status unknown, test it.
+   UI rules for this pass: snippets as Replace this/with this, full file when the rewrite is heavy; no re-sending whole files for small mobile CSS fixes (send only the CSS block to append); write code only when he says go.
 
-| #   | Role                                           | Side                                       |
-| --- | ---------------------------------------------- | ------------------------------------------ |
-| 1   | Lead / DevOps / Integration (Migel, this file) | repo, hosting, config, reviews             |
-| 2   | Database / Supabase                            | backend: migrations, RLS, functions, seed  |
-| 3   | Auth / Admin / App shell                       | frontend core, login, guards, layout       |
-| 4   | Teacher side                                   | courses, sections, stream, materials       |
-| 5   | Student side + activities                      | dashboard, activities, submissions, grades |
-
-**Timeline:** Oct 27-28 setup; Oct 29-30 schema v1, login, shell, deployed URL; Oct 31-Nov 2 courses and sections (Nov 1-2 flex); Nov 3-4 stream and materials; Nov 4-6 activities and submissions; Nov 6-7 grading and admin, **feature freeze end of Nov 7**; Nov 8-9 integration and offline test; Nov 10 rehearsal; **Nov 11 demo**. Cut order if late: comments, people list, grade release toggle, admin page, Google sign-in.
-
-## 4. Decisions / rules already made (do not re-ask)
-
-- **Stack:** Angular (standalone, new `app.ts`/`app.html` file naming) + Angular Material; Supabase (Postgres, Auth, Storage, RLS); **no separate backend server** (Laravel dropped: free PHP hosting is weak). Custom logic = Postgres RPC or Edge Functions. Hosting: Cloudflare Pages or Vercel (pick one at A5), auto-deploy `main`. Offline demo = Docker + local Supabase + built Angular on one laptop; designed now, tested Nov 8-9; Google sign-in needs internet, so offline uses seeded email/password.
-- **Repo layout:** `frontend/` Angular, `backend/` Supabase CLI project, `docs/`, `.github/`. All schema changes are **migration files** in `backend/supabase/migrations/`; never click schema in the dashboard, never edit an applied migration.
-- **Auth:** Google sign-in plus email fallback; only `@iskolarngbayan.pup.edu.ph` (also enforced by a DB trigger); teacher domain unconfirmed and may differ. Default role `student`; admin approves `teacher`. Role checks in both Angular guards and RLS.
-- **Secrets:** project URL and anon key are committed in `frontend/src/environments/` (RLS protects data). Never commit service_role, Google client secret or DB password.
-- **Git:** `main` protected (PR + 1 review); short-lived branches `feat/<area>-<task>`, `fix/`, `db/`; squash merge; no shared `feat` branch, no `dev` branch; after the Nov 7 freeze only `fix/` PRs. Branches live at most 2 days.
-- **Ownership (Lead's files):** `.github/` (CODEOWNERS, PR template), `docs/`, root `README.md`, `frontend/angular.json`, `frontend/src/environments/`, `backend/package.json`, `backend/supabase/config.toml`, hosting settings. Others stay in their own folders; DB person regenerates `frontend/src/app/core/models/database.types.ts`; frontend codes against mock services until schema v1 (target Oct 30).
-- Setup was split: Lead does Part A of the plan, teammates then clone, `npm install`, `npm start`.
-
-## 5. Where things are and status
-
-```
-pup-lms/ (local folder; GitHub repo migeltan/CCIS-LMS)
-  frontend/  Angular app (src/app, src/environments, angular.json)
-  backend/   Supabase CLI (package.json, supabase/config.toml, migrations/ later)
-  docs/      Project_Plan.md (plan, roles, flowcharts)
-  .github/   PULL_REQUEST_TEMPLATE.md, CODEOWNERS (later)
-  .gitignore, README.md, CLAUDE.md
-```
-
-**Done locally (as of Oct 28, branch `main`, check `git log` for what is pushed):** `git init -b main`; Angular scaffold with Material, `ng generate environments` and `@supabase/supabase-js`; `npm start` shows the Angular starter page from `D:\Projects\pup-lms`; `backend/` with Supabase CLI 2.122.0 and `supabase init`; root `.gitignore`. README and PR template added after the first push. **Not done:** first commit and push, Supabase project link, any migration, storage buckets, Google OAuth, real values in `environment.ts` (currently a near-empty default), hosting, CODEOWNERS, branch protection, teammates' onboarding.
-
-**Verify (run in the clone):**
-
-```bash
-cd /home/claude/lms/repo && git log --oneline -3
-ls frontend/src/environments backend/supabase
-ls backend/supabase/migrations 2>/dev/null
-grep -n "supabaseUrl" frontend/src/environments/environment.ts
-ls .github docs
-```
-
-Gotchas: README's clone path must match the repo folder name; Angular files are `app.ts`, `app.html`, `app.config.ts`, `app.routes.ts` (no `.component`); `.github` and `docs` stay invisible to Git while empty.
-
-## 6. Next (Lead's queue, one at a time; say "go" before each)
-
-1. Repo hygiene: add teammates as collaborators, protect `main` (PR + 1 review), then CODEOWNERS with their real GitHub usernames.
-2. **A3:** link the Supabase project (`npx supabase login`, `link`), empty `init_schema` migration, `db push`, private buckets `materials` and `submissions` with size limit, Google OAuth client, Site URL and redirect URLs (`http://localhost:4200` and the deployed URL).
-3. **A4:** fill `environment.ts` and `environment.development.ts` with project URL and anon key; `environment.local.ts` and `start:local` later for offline.
-4. **A5:** hosting (root `frontend`, build `npm run build`, SPA fallback, test a deep-link refresh).
-5. **A6 leftovers:** CODEOWNERS (needs teammates' GitHub usernames).
-6. **A7:** fresh-clone test (`npm install`, `npm start`), then the announcement message to the group.
-7. After that: setup spike checklist (plan Section 6, due Oct 29), review the schema v1 PR, deployed URL by Oct 30, then PR review and integration.
-
-## 7. Known risks (state them, do not hide them)
-
-- Free-tier limits are not yet verified (Supabase idle pausing, storage and upload caps); check on Oct 28 and again before the demo.
-- Teacher email domain unconfirmed: the domain restriction may block teachers.
-- Schema v1 (Oct 30) is the early bottleneck; everyone else uses mocks until then.
-- Docker Desktop (and WSL2) for the offline demo is not confirmed installed on the Lead's laptop; setup can eat time.
-- 15 days is tight; merge conflicts in the last week; branch protection may not be enforced on a free private repo.
-
-## 8. Updating this file
-
-Only when the conversation nears ~90% usage, he says it is ending, or he asks: update sections 5-7 only, deliver the full file once as a downloadable `.md` (dense, under ~130 lines, drop stale detail), and remind him to commit it to the repo root and push to `main` so a fresh clone sees it.
+7. Known risks (state them, do not hide them)
+   Login redesign is syntax-checked only (replacements matched once, braces balanced), never compiled or viewed; template uses @for and signals so it needs the project's Angular 17+ (it already uses them elsewhere).
+   Slideshow shows gradient placeholders until real photos are added; photos must be ones he has permission to use.
+   Teacher email domain unconfirmed: sign-up domain restriction (DB trigger plus migration) may block teachers.
+   Free-tier limits not verified (Supabase idle pausing, storage and upload caps); recheck before any demo.
+   Docker Desktop (WSL2) for the offline demo not confirmed on his laptop.
+   Branch protection may not be enforced on a free private repo; UI edits touch role 3's files, so merge conflicts are possible.
+   Section 3 timeline (Nov 11 deadline) predates this phase; treat it as history, do not plan from it without asking.
+8. Updating this file
+   Only when the conversation nears ~90% usage, he says it is ending, or he asks: update sections 5-7 only, deliver the full file once as a downloadable .md (dense, under ~130 lines, drop stale detail), and remind him to commit it to the repo root and push to main so a fresh clone sees it.

@@ -1,25 +1,117 @@
-<div class="wrap">
-  <mat-card class="card">
-    <mat-card-header>
-      <mat-card-title>PUP Classroom</mat-card-title>
-      <mat-card-subtitle>Sign in with your school account</mat-card-subtitle>
-    </mat-card-header>
-    <mat-card-content>
-      <button mat-flat-button class="full" (click)="google()">
+<div class="page" [class.leaving]="leaving()">
+  <section class="showcase" aria-hidden="true">
+    @for (slide of slides; track $index) {
+      <div class="slide" [class.active]="current() === $index" [style.background-image]="slide.bg">
+        <p class="caption">{{ slide.caption }}</p>
+      </div>
+    }
+  </section>
+
+  <div class="dots" role="tablist" aria-label="Campus slideshow">
+    @for (slide of slides; track $index) {
+      <button
+        type="button"
+        class="dot"
+        [class.active]="current() === $index"
+        [attr.aria-label]="'Show slide ' + ($index + 1)"
+        [attr.aria-current]="current() === $index"
+        (click)="goTo($index)"
+      ></button>
+    }
+  </div>
+
+  <main class="panel">
+    <div class="card">
+      <h1 class="brand">Iskolar Archive</h1>
+      <p class="sub">
+        Sign in with your school account to access your classes, materials and grades.
+      </p>
+
+      <button
+        mat-stroked-button
+        class="full"
+        type="button"
+        [disabled]="loading()"
+        (click)="google()"
+      >
         Sign in with Google
       </button>
-      <p class="or">or use email and password</p>
+
+      <div class="divider"><span>or sign in with email</span></div>
+
       <form [formGroup]="form" (ngSubmit)="submit()">
-        <mat-form-field class="full">
-          <mat-label>Email</mat-label>
-          <input matInput type="email" formControlName="email" />
+        <mat-form-field appearance="outline" class="full">
+          <mat-label>I am a</mat-label>
+          <mat-select
+            [value]="accountType()"
+            [disabled]="loading()"
+            (selectionChange)="onAccountTypeChange($event.value)"
+          >
+            @for (opt of accountOptions; track opt.value) {
+              <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
+            }
+          </mat-select>
         </mat-form-field>
-        <mat-form-field class="full">
+
+        <mat-form-field appearance="outline" class="full">
+          <mat-label>Username</mat-label>
+          <input
+            matInput
+            type="text"
+            formControlName="username"
+            placeholder="juandelacruz"
+            autocomplete="username"
+            (input)="onUsernameInput()"
+            (change)="onUsernameInput()"
+          />
+          <span matTextSuffix class="suffix">&#64;{{ domain() }}</span>
+          @if (form.controls.username.hasError('required')) {
+            <mat-error>Enter your username</mat-error>
+          } @else if (form.controls.username.hasError('domainMismatch')) {
+            <mat-error>Use your &#64;{{ domain() }} email</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full">
           <mat-label>Password</mat-label>
-          <input matInput type="password" formControlName="password" />
+          <input
+            matInput
+            [type]="hidePassword() ? 'password' : 'text'"
+            formControlName="password"
+            autocomplete="current-password"
+          />
+          <button
+            mat-icon-button
+            matSuffix
+            type="button"
+            (click)="hidePassword.set(!hidePassword())"
+            [attr.aria-label]="hidePassword() ? 'Show password' : 'Hide password'"
+            [attr.aria-pressed]="!hidePassword()"
+          >
+            <mat-icon>{{ hidePassword() ? 'visibility' : 'visibility_off' }}</mat-icon>
+          </button>
+          @if (form.controls.password.hasError('required')) {
+            <mat-error>Enter your password</mat-error>
+          }
         </mat-form-field>
-        <button mat-stroked-button class="full" type="submit">Sign in</button>
+
+        @if (errorMessage()) {
+          <p class="form-error" role="alert">{{ errorMessage() }}</p>
+        }
+
+        <button mat-flat-button class="full" type="submit" [attr.aria-busy]="loading()">
+          @if (loading()) {
+            <span class="btn-loading">
+              <mat-spinner diameter="20"></mat-spinner>
+              <span>Signing in…</span>
+            </span>
+          } @else {
+            Sign in
+          }
+        </button>
       </form>
-    </mat-card-content>
-  </mat-card>
+
+      <p class="foot">Polytechnic University of the Philippines · CCIS</p>
+    </div>
+  </main>
 </div>
