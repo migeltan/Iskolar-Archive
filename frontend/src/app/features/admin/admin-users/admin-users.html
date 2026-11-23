@@ -1,1 +1,52 @@
-<p>admin-users works!</p>
+<div class="page">
+  <header class="header">
+    <h1>Teacher requests</h1>
+    <p class="subtitle">Staff accounts that signed up and are waiting for approval.</p>
+  </header>
+
+  @if (message(); as m) {
+    <p class="msg" [class.bad]="!m.ok" role="status">{{ m.text }}</p>
+  }
+
+  <section class="panel">
+    @if (loading()) {
+      <p class="muted">Loading…</p>
+    } @else if (loadError()) {
+      <p class="msg bad">{{ loadError() }}</p>
+      <button mat-stroked-button type="button" (click)="load()">Try again</button>
+    } @else if (pending().length === 0) {
+      <p class="muted">No pending requests.</p>
+    } @else {
+      <ul class="rows">
+        @for (t of pending(); track t.id) {
+          <li class="row">
+            <div class="who">
+              <strong>{{ t.fullName || t.email }}</strong>
+              <span class="muted"
+                >{{ t.email }} · requested {{ t.requestedAt | date: 'mediumDate' }}</span
+              >
+            </div>
+            <div class="actions">
+              <button
+                mat-stroked-button
+                type="button"
+                [disabled]="busyId() !== null"
+                (click)="reject(t)"
+              >
+                Decline
+              </button>
+              <button
+                mat-flat-button
+                type="button"
+                [disabled]="busyId() !== null"
+                (click)="approve(t)"
+              >
+                {{ busyId() === t.id ? 'Working…' : 'Approve' }}
+              </button>
+            </div>
+          </li>
+        }
+      </ul>
+    }
+  </section>
+</div>

@@ -14,9 +14,10 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatButtonModule } from '@angular/material/button';
-import { AuthService } from '../../../core/auth/auth.service';
+import { AccountBlockedError, AuthService } from '../../../core/auth/auth.service';
 
 type AccountType = 'student' | 'staff';
+type Mode = 'signin' | 'signup';
 
 interface AccountOption {
   value: AccountType;
@@ -65,6 +66,8 @@ export class Login implements OnInit, OnDestroy {
   protected readonly loading = signal(false);
   protected readonly leaving = signal(false);
   protected readonly errorMessage = signal('');
+  protected readonly infoMessage = signal('');
+  protected readonly mode = signal<Mode>('signin');
 
   // Username only is expected, but a pasted full address is accepted
   // as long as its domain matches the selected account type.
@@ -81,10 +84,28 @@ export class Login implements OnInit, OnDestroy {
     return local && host === this.domain() ? null : { domainMismatch: true };
   };
 
+  // Group-level check: the two password boxes must be equal.
+  private passwordsMatch(group: AbstractControl): ValidationErrors | null {
+    const pw = group.get('password')?.value;
+    const confirm = group.get('confirm')?.value;
+    return pw && confirm && pw !== confirm ? { mismatch: true } : null;
+  }
+
   protected readonly form = this.fb.group({
     username: ['', [Validators.required, this.usernameRule]],
     password: ['', Validators.required],
   });
+
+  // Create-account form. Same username/domain rules as sign-in.
+  protected readonly signupForm = this.fb.group(
+    {
+      fullName: ['', [Validators.required, Validators.minLength(2)]],
+      username: ['', [Validators.required, this.usernameRule]],
+      password: ['', [Validators.required, Validators.minLength(8)]],
+      confirm: ['', Validators.required],
+    },
+    { validators: this.passwordsMatch },
+  );
 
   // Landing slideshow. Photos live in frontend/public/assets/images/.
   // To add a slide, add one more object to this array.
@@ -136,12 +157,12 @@ export class Login implements OnInit, OnDestroy {
     this.accountType.set(value);
     // re-check the username against the newly selected domain
     this.form.controls.username.updateValueAndValidity();
+    this.signupForm.controls.username.updateValueAndValidity();
   }
 
   // Browser autofill (or a paste) can fill the whole address. If its domain
   // matches an account type, switch the dropdown to it and keep only the username.
-  protected onUsernameInput(): void {
-    const control = this.form.controls.username;
+  protected onUsernameInput(control: AbstractControl): void {
     const value = String(control.value ?? '')
       .trim()
       .toLowerCase();
@@ -160,13 +181,45 @@ export class Login implements OnInit, OnDestroy {
   private showError(err?: unknown): void {
     console.error('Sign-in failed:', err);
     const msg = err instanceof Error ? err.message : '';
-    this.errorMessage.set(
-      /fetch|network/i.test(msg)
-        ? 'Cannot reach the server. Check your connection and try again.'
-        : 'Could not sign in. Check your details and try again.',
-    );
+    if (err instanceof AccountBlockedError) {
+      // Pending approval / suspended: say so instead of the generic message.
+      this.errorMessage.set(err.message);
+    } else {
+      this.errorMessage.set(
+        /fetch|network/i.test(msg)
+          ? 'Cannot reach the server. Check your connection and try again.'
+          : 'Could not sign in. Check your details and try again.',
+      );
+    }
     this.loading.set(false);
     this.form.enable();
+  }
+
+  protected setMode(mode: Mode): void {
+    if (this.loading()) return;
+    this.mode.set(mode);
+    this.errorMessage.set('');
+    this.infoMessage.set('');
+  }
+
+  private showSignUpError(err: unknown): void {
+    console.error('Sign-up failed:', err);
+    const msg = err instanceof Error ? err.message : '';
+    let text = 'Could not create your account. Try again.';
+    if (/already registered/i.test(msg)) {
+      text = 'That email already has an account. Sign in instead.';
+    } else if (/fetch|network/i.test(msg)) {
+      text = 'Cannot reach the server. Check your connection and try again.';
+    } else if (/database error|domain/i.test(msg)) {
+      text = `Use your @${this.domain()} school email.`;
+    } else if (/password/i.test(msg)) {
+      text = 'Choose a stronger password (at least 8 characters).';
+    } else if (/rate limit|too many/i.test(msg)) {
+      text = 'Too many attempts. Wait a few minutes and try again.';
+    }
+    this.errorMessage.set(text);
+    this.loading.set(false);
+    this.signupForm.enable();
   }
 
   // Fade the page out, then go to the next route
@@ -209,6 +262,46 @@ export class Login implements OnInit, OnDestroy {
       }
     } catch (err) {
       this.showError(err);
+    }
+  }
+
+  protected async submitSignUp(): Promise<void> {
+    if (this.loading()) return;
+    if (this.signupForm.invalid) {
+      this.signupForm.markAllAsTouched();
+      return;
+    }
+
+    const v = this.signupForm.value;
+    const username = (v.username || '').trim().toLowerCase();
+    const email = username.includes('@') ? username : `${username}@${this.domain()}`;
+
+    this.errorMessage.set('');
+    this.infoMessage.set('');
+    this.loading.set(true);
+    this.signupForm.disable();
+
+    try {
+      const result = await this.auth.signUp(v.fullName || '', email, v.password || '');
+      if (result === 'ok') {
+        await this.goNext(this.auth.role() === 'student' ? '/dashboard' : '/courses');
+        return;
+      }
+      if (result === 'pending') {
+        // Staff accounts wait for an admin. Drop the half-open session.
+        await this.auth.signOut();
+        this.infoMessage.set(
+          'Account created. An admin must approve your teacher account before you can sign in.',
+        );
+      } else {
+        this.infoMessage.set('Account created. Check your email to confirm it, then sign in.');
+      }
+      this.signupForm.reset();
+      this.signupForm.enable();
+      this.loading.set(false);
+      this.mode.set('signin');
+    } catch (err) {
+      this.showSignUpError(err);
     }
   }
 }
