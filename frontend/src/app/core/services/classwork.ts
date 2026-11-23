@@ -249,6 +249,16 @@ export class Classwork {
     return this.storage.getMaterialUrl(file.storagePath);
   }
 
+  /** Files the teacher attached to one activity (reference material for the students). */
+  async activityFiles(activityId: string): Promise<ClassworkFile[]> {
+    const { data, error } = await this.supabase
+      .from('attachments')
+      .select(FILE_COLUMNS)
+      .eq('activity_id', activityId)
+      .order('created_at', { ascending: true });
+    if (error) throw error;
+    return (data as unknown as FileRow[]).map(toFile);
+  }
   // ---------- Topics ----------
 
   async listTopics(sectionId: string): Promise<string[]> {

@@ -215,3 +215,29 @@ $font-body: 'TT Drugs', 'Poppins', sans-serif;
     font: inherit;
   }
 }
+
+.detail__link {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: $accent-strong;
+  font: inherit;
+  text-decoration: underline;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+}
+
+.detail__late {
+  color: #b3261e;
+}
+
+.detail__error {
+  margin: 0;
+  color: #b3261e;
+  font-size: 0.85rem;
+}
+
+.comments__author {
+  margin-right: 0.5rem;
+  font-weight: 600;
+}

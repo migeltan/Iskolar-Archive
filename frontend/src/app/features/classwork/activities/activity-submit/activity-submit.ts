@@ -1,5 +1,14 @@
 import { DatePipe } from '@angular/common';
-import { Component, ElementRef, OnInit, inject, input, signal, viewChild } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  OnInit,
+  computed,
+  inject,
+  input,
+  signal,
+  viewChild,
+} from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { catchError, forkJoin, map, of, timer } from 'rxjs';
 import { MatButtonModule } from '@angular/material/button';
@@ -11,6 +20,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Activity, SubmissionWithFiles } from '../../../../core/models/classwork.models';
 import { Activities } from '../../../../core/services/activities';
+import { Classwork, ClassworkFile } from '../../../../core/services/classwork';
 import { ActivityComment, Comments } from '../../../../core/services/comments';
 import { Submissions } from '../../../../core/services/submissions';
 import { launchConfetti } from '../confetti';
@@ -18,9 +28,6 @@ import { ConfirmDialog } from '../confirm-dialog/confirm-dialog';
 import { AuthService } from '../../../../core/auth/auth.service';
 import { Skeleton } from '../../../skeleton/skeleton';
 
-// TEMPORARY: replace with auth.userId() once the Shell PR is merged.
-const TEMP_STUDENT_ID = 'student-1';
-const TEMP_STUDENT_NAME = 'You';
 const ALLOWED_TYPES = [
   'application/pdf',
   'application/vnd.openxmlformats-officedocument.presentationml.presentation',
@@ -61,6 +68,7 @@ export class ActivitySubmit implements OnInit {
   private activitiesService = inject(Activities);
   private submissionsService = inject(Submissions);
   private commentsService = inject(Comments);
+  private classwork = inject(Classwork);
   private dialog = inject(MatDialog);
   private auth = inject(AuthService);
 
@@ -77,6 +85,9 @@ export class ActivitySubmit implements OnInit {
   saving = signal(false);
   error = signal('');
   message = signal('');
+
+  // Files the teacher attached to this activity.
+  activityFiles = signal<ClassworkFile[]>([]);
 
   // "Your work" card turns red and shakes when nothing is attached.
   workInvalid = signal(false);
@@ -101,14 +112,25 @@ export class ActivitySubmit implements OnInit {
       this.error.set('No activity selected.');
       return;
     }
-    this.activitiesService.getById(id).subscribe((a) => {
-      this.activity.set(a);
-      this.loading.set(false);
+    this.activitiesService.getById(id).subscribe({
+      next: (a) => {
+        this.activity.set(a);
+        this.loading.set(false);
+      },
+      error: () => {
+        this.error.set('Could not load this activity. Please try again.');
+        this.loading.set(false);
+      },
     });
     this.loadMine(id);
-    this.commentsService.listForStudent(id, this.studentId).subscribe((list) => {
-      this.comments.set(list);
+    this.commentsService.listForStudent(id, this.studentId).subscribe({
+      next: (list) => this.comments.set(list),
+      error: () => this.commentError.set('Could not load your comments.'),
     });
+    this.classwork
+      .activityFiles(id)
+      .then((files) => this.activityFiles.set(files))
+      .catch((err) => console.error('Could not load the activity files', err));
   }
 
   private loadMine(activityId: string): void {
@@ -134,6 +156,33 @@ export class ActivitySubmit implements OnInit {
   isOverdue(): boolean {
     const due = this.activity()?.due_at;
     return !!due && new Date(due) < new Date() && !this.mySubmission();
+  }
+
+  /** Graded or released work is locked: the database refuses changes too. */
+  locked = computed(() => {
+    const s = this.mySubmission();
+    return !!s && (s.status === 'graded' || s.grade_released);
+  });
+
+  /** Late is only a label: it is shown when the work came in after the due date. */
+  isLate(sub: SubmissionWithFiles): boolean {
+    const due = this.activity()?.due_at;
+    return !!due && !!sub.submitted_at && new Date(sub.submitted_at) > new Date(due);
+  }
+
+  async openActivityFile(file: ClassworkFile): Promise<void> {
+    try {
+      window.open(await this.classwork.fileUrl(file), '_blank', 'noopener');
+    } catch {
+      this.error.set('Could not open the file. Please try again.');
+    }
+  }
+
+  private failureMessage(err: unknown): string {
+    const text = String((err as { message?: string } | null)?.message ?? '');
+    if (/locked|graded/i.test(text)) return 'This work is graded, so it can no longer be changed.';
+    if (/fetch|network/i.test(text)) return 'Cannot reach the server. Check your connection.';
+    return 'Something went wrong. Please try again.';
   }
 
   // ---------- Your work ----------
@@ -250,8 +299,8 @@ export class ActivitySubmit implements OnInit {
         file,
       })
       .pipe(
-        map((s) => ({ s })),
-        catchError(() => of({ s: null })),
+        map((s) => ({ s, failure: '' })),
+        catchError((err: unknown) => of({ s: null, failure: this.failureMessage(err) })),
       );
 
     // Wait for BOTH the request and the minimum loading time.
@@ -259,7 +308,7 @@ export class ActivitySubmit implements OnInit {
       this.saving.set(false);
 
       if (!result.s) {
-        this.error.set('Something went wrong. Please try again.');
+        this.error.set(result.failure || 'Something went wrong. Please try again.');
         return;
       }
 
@@ -311,8 +360,6 @@ export class ActivitySubmit implements OnInit {
       .add({
         activityId: activity.id,
         studentId: this.studentId,
-        authorId: this.studentId,
-        authorName: TEMP_STUDENT_NAME,
         body,
       })
       .subscribe({

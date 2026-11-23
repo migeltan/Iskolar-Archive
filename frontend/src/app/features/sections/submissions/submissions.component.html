@@ -1,4 +1,8 @@
-@if (activity; as current) {
+@if (loading()) {
+  <p class="submissions__missing">Loading submissions…</p>
+} @else if (loadError()) {
+  <p class="submissions__missing">{{ loadError() }}</p>
+} @else if (activity(); as current) {
   <section class="submissions">
     <a
       class="submissions__back"
@@ -13,11 +17,11 @@
         <h2 class="roster__title">Submissions</h2>
         <div class="roster__counts">
           <div class="count">
-            <strong class="count__number">{{ submittedCount }}</strong>
+            <strong class="count__number">{{ submittedCount() }}</strong>
             submitted
           </div>
           <div class="count">
-            <strong class="count__number">{{ pendingCount }}</strong>
+            <strong class="count__number">{{ pendingCount() }}</strong>
             pending
           </div>
         </div>
@@ -37,18 +41,16 @@
               >
                 <img class="roster__avatar" src="assets/images/default-avatar.svg" alt="" />
                 <span class="roster__name"> {{ student.lastName }}, {{ student.firstName }} </span>
-                <span class="roster__status">
-                  {{ gradeFor(student.id)?.status ?? 'Pending' }}
-                </span>
+                <span class="roster__status">{{ statusOf(student) }}</span>
                 <span class="roster__score">
-                  {{ gradeFor(student.id)?.score ?? '_' }} / {{ current.points }}
+                  {{ scoreOf(student) ?? '_' }} / {{ current.points }}
                 </span>
               </button>
             </li>
           } @empty {
             <li class="roster__empty">
               No students have joined yet. Share the Section Code:
-              <strong>{{ sectionCode }}</strong> with your class.
+              <strong>{{ sectionCode() }}</strong> with your class.
             </li>
           }
         </ul>
@@ -58,14 +60,14 @@
         <header class="detail__activity">
           <div class="detail__heading">
             <h2 class="detail__title">{{ current.title }}</h2>
-            @if (current.dueAt) {
+            @if (current.due_at) {
               <span class="detail__due">
-                Due {{ current.dueAt | date: 'MMM d, y' }} |
-                {{ current.dueAt | date: 'h:mm a' }}
+                Due {{ current.due_at | date: 'MMM d, y' }} |
+                {{ current.due_at | date: 'h:mm a' }}
               </span>
             }
           </div>
-          <p class="detail__details">{{ current.details }}</p>
+          <p class="detail__details">{{ current.instructions }}</p>
         </header>
 
         @if (selected(); as student) {
@@ -77,37 +79,65 @@
               </span>
             </div>
 
-            @if (gradeFor(student.id); as grade) {
-              <p class="detail__file">
-                @if (grade.submissionFile) {
-                  Submitted file: <strong>{{ grade.submissionFile }}</strong>
-                } @else {
-                  No file submitted yet.
-                }
-              </p>
+            @if (selectedRow(); as sub) {
+              @if (sub.submitted_at) {
+                <p class="detail__file">
+                  Submitted {{ sub.submitted_at | date: 'MMM d, y, h:mm a' }}
+                  @if (isLate(sub)) {
+                    <strong class="detail__late"> · Late</strong>
+                  }
+                </p>
+              } @else {
+                <p class="detail__file">No work submitted. This grade was entered by you.</p>
+              }
+              @if (sub.answer_text) {
+                <p class="detail__file">
+                  Link:
+                  <a
+                    class="detail__link"
+                    [href]="sub.answer_text"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    >{{ sub.answer_text }}</a
+                  >
+                </p>
+              }
+              @for (file of sub.attachments; track file.id) {
+                <p class="detail__file">
+                  File:
+                  <button type="button" class="detail__link" (click)="openFile(file)">
+                    {{ file.file_name }}
+                  </button>
+                </p>
+              }
+            } @else {
+              <p class="detail__file">No work submitted yet.</p>
+            }
 
-              <label class="detail__grade">
-                Grade:
-                <input
-                  class="detail__grade-input"
-                  type="number"
-                  min="0"
-                  [max]="current.points"
-                  [disabled]="grade.status === 'Pending'"
-                  [value]="grade.score ?? ''"
-                  (change)="setScore(student, $event)"
-                />
-                / {{ current.points }}
-              </label>
+            <label class="detail__grade">
+              Grade:
+              <input
+                class="detail__grade-input"
+                type="number"
+                min="0"
+                [max]="current.points"
+                [value]="scoreOf(student) ?? ''"
+                (change)="setScore(student, $event)"
+              />
+              / {{ current.points }}
+            </label>
+            @if (saveError()) {
+              <p class="detail__error" role="alert">{{ saveError() }}</p>
             }
 
             <div class="comments">
-              <h3 class="comments__title">Comments</h3>
-              @for (comment of selectedComments(); track comment.id) {
+              <h3 class="comments__title">Private comments</h3>
+              @for (comment of comments(); track comment.id) {
                 <p class="comments__item">
-                  {{ comment.text }}
+                  <span class="comments__author">{{ comment.author_name }}</span>
+                  {{ comment.body }}
                   <span class="comments__time">
-                    {{ comment.postedAt | date: 'MMM d, h:mm a' }}
+                    {{ comment.created_at | date: 'MMM d, h:mm a' }}
                   </span>
                 </p>
               }
@@ -117,6 +147,7 @@
                   type="text"
                   placeholder="Write a comment..."
                   aria-label="Write a comment"
+                  maxlength="500"
                   [formControl]="commentDraft"
                   (keydown.enter)="addComment()"
                 />

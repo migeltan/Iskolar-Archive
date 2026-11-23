@@ -11,7 +11,7 @@
   }
 
   @if (loading()) {
-      <div class="sk" role="status" aria-label="Loading activity">
+    <div class="sk" role="status" aria-label="Loading activity">
       <app-skeleton width="55%" height="36px" />
       <app-skeleton width="30%" height="28px" radius="999px" />
       <app-skeleton height="110px" radius="16px" />
@@ -26,7 +26,7 @@
     <header class="header">
       <h1>{{ activity()!.title }}</h1>
       <div class="tags">
-                <span class="tag" [class.tag-score]="scoreVisible()">
+        <span class="tag" [class.tag-score]="scoreVisible()">
           <mat-icon>stars</mat-icon>
           @if (scoreVisible()) {
             {{ mySubmission()!.score }} / {{ activity()!.points }} points
@@ -43,7 +43,7 @@
       </div>
     </header>
 
-    @if (activity()!.instructions || activity()!.form_url) {
+    @if (activity()!.instructions || activity()!.form_url || activityFiles().length) {
       <mat-card appearance="outlined" class="block">
         <mat-card-content>
           <h2>Instructions</h2>
@@ -55,6 +55,12 @@
               <mat-icon>open_in_new</mat-icon>
               Open the Google Form
             </a>
+          }
+          @for (file of activityFiles(); track file.id) {
+            <button mat-stroked-button type="button" (click)="openActivityFile(file)">
+              <mat-icon>attach_file</mat-icon>
+              {{ file.fileName }}
+            </button>
           }
         </mat-card-content>
       </mat-card>
@@ -78,7 +84,16 @@
         </div>
 
         @if (mySubmission(); as sub) {
-          <p class="muted">Last submitted {{ sub.submitted_at | date: 'medium' }}</p>
+          @if (sub.submitted_at) {
+            <p class="muted">
+              Last submitted {{ sub.submitted_at | date: 'medium' }}
+              @if (isLate(sub)) {
+                · <strong class="late">Late</strong>
+              }
+            </p>
+          } @else {
+            <p class="muted">No work was submitted. Your teacher entered this grade.</p>
+          }
 
           @for (att of sub.attachments; track att.id) {
             <p class="file-line"><mat-icon>attach_file</mat-icon>{{ att.file_name }}</p>
@@ -89,6 +104,10 @@
               <p class="feedback"><strong>Feedback:</strong> {{ sub.feedback }}</p>
             </div>
           }
+        }
+
+        @if (locked()) {
+          <p class="muted">This work is graded, so it can no longer be changed.</p>
         }
 
         <mat-form-field appearance="outline" class="full">
@@ -149,7 +168,12 @@
       </mat-card-content>
 
       <mat-card-actions align="end">
-        <button mat-flat-button type="button" [disabled]="saving()" (click)="askToSubmit()">
+        <button
+          mat-flat-button
+          type="button"
+          [disabled]="saving() || locked()"
+          (click)="askToSubmit()"
+        >
           @if (saving()) {
             <mat-spinner diameter="18" class="btn-spinner" />
             Submitting...
@@ -203,7 +227,12 @@
           <button mat-button type="button" [disabled]="sendingComment()" (click)="cancelComment()">
             Cancel
           </button>
-          <button mat-flat-button type="button" [disabled]="sendingComment()" (click)="sendComment()">
+          <button
+            mat-flat-button
+            type="button"
+            [disabled]="sendingComment()"
+            (click)="sendComment()"
+          >
             @if (sendingComment()) {
               <mat-spinner diameter="18" class="btn-spinner" />
               Sending...
