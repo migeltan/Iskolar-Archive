@@ -1,243 +1,325 @@
-$accent: #f4847b;
-$accent-strong: #e86f5c;
-$bg: #fff9f9;
-$font-body: 'TT Drugs', 'Poppins', sans-serif;
-
 :host {
   display: block;
-  font-family: $font-body;
-  color: $accent;
 }
 
 .submissions {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  padding: 1.5rem 2rem;
-
-  &__back {
-    align-self: flex-start;
-    color: $accent;
-  }
-
-  &__layout {
-    display: grid;
-    grid-template-columns: minmax(16rem, 22rem) 1fr;
-    gap: 1.5rem;
-    align-items: start;
-  }
-
-  &__missing {
-    padding: 2rem;
-  }
+  gap: 16px;
 }
 
-.roster {
+.back {
+  align-self: flex-start;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(16rem, 22rem) 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+// ---------- Ruled panel ----------
+.panel {
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: 12px;
+  background: #fff;
+}
+
+.panel-head {
   display: flex;
-  flex-direction: column;
-  gap: 1rem;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--mat-sys-outline-variant);
 
-  &__title {
+  h2 {
     margin: 0;
-    font-size: 1rem;
-    font-weight: 600;
-  }
-
-  &__counts {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0.75rem;
-  }
-
-  &__list {
-    margin: 0;
-    padding: 0;
-    border: 1px solid $accent;
-    background: $bg;
-    list-style: none;
-  }
-
-  &__item {
-    display: grid;
-    grid-template-columns: auto 1fr auto;
-    grid-template-areas:
-      'avatar name score'
-      'avatar status score';
-    align-items: center;
-    gap: 0 0.75rem;
-    width: 100%;
-    padding: 0.75rem 1rem;
-    border: 0;
-    background: transparent;
-    color: inherit;
-    font: inherit;
-    text-align: left;
-    cursor: pointer;
-
-    &--active {
-      background: rgba($accent, 0.3);
-    }
-  }
-
-  &__avatar {
-    grid-area: avatar;
-    width: 2.25rem;
-    height: 2.25rem;
-  }
-
-  &__name {
-    grid-area: name;
-    font-weight: 600;
-  }
-
-  &__status {
-    grid-area: status;
-    font-size: 0.8rem;
-  }
-
-  &__score {
-    grid-area: score;
-    font-weight: 600;
-  }
-
-  &__empty {
-    padding: 1.5rem 1rem;
-    text-align: center;
+    font: var(--mat-sys-title-medium);
+    overflow-wrap: anywhere;
   }
 }
 
-.count {
-  padding: 0.75rem;
-  border: 1px solid $accent;
-  border-radius: 1rem;
-  background: $bg;
+.count-badge {
+  min-width: 24px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #800000;
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 600;
   text-align: center;
+}
 
-  &__number {
-    display: block;
-    font-size: 2rem;
-    line-height: 1.1;
-  }
+.due {
+  margin-left: auto;
+  color: var(--mat-sys-on-surface-variant);
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+.panel-text {
+  margin: 0;
+  padding: 14px 20px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.panel-body {
+  padding: 8px 20px 16px;
 }
 
 .detail {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-
-  &__activity,
-  &__student {
-    padding: 1rem 1.25rem;
-    border: 1px solid $accent;
-    border-radius: 1rem;
-    background: $bg;
-  }
-
-  &__heading,
-  &__student-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-  }
-
-  &__title {
-    margin: 0;
-    color: $accent-strong;
-    font-size: 1.25rem;
-  }
-
-  &__due {
-    font-weight: 600;
-  }
-
-  &__details,
-  &__file {
-    margin: 0.5rem 0 0;
-  }
-
-  &__student-name {
-    flex: 1;
-    font-weight: 600;
-  }
-
-  &__grade {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    margin-top: 1rem;
-    font-weight: 600;
-  }
-
-  &__grade-input {
-    width: 5rem;
-    padding: 0.4rem 0.6rem;
-    border: 1px solid $accent;
-    border-radius: 0.5rem;
-    background: #fff;
-    color: $accent;
-    font: inherit;
-  }
+  gap: 20px;
 }
 
-.comments {
-  margin-top: 1.25rem;
+// ---------- Roster ----------
+.roster__top {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--mat-sys-outline-variant);
+}
 
-  &__title {
-    margin: 0 0 0.5rem;
-    font-size: 1rem;
-  }
+.counts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
 
-  &__item {
-    margin: 0 0 0.5rem;
-    padding: 0.5rem 0.75rem;
-    border-radius: 0.75rem;
-    background: rgba($accent, 0.15);
-  }
+.stat {
+  padding: 10px;
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: 12px;
+  background: var(--mat-sys-surface);
+  color: var(--mat-sys-on-surface-variant);
+  text-align: center;
 
-  &__time {
+  &__number {
     display: block;
-    font-size: 0.75rem;
-  }
-
-  &__composer {
-    display: flex;
-    gap: 0.5rem;
-  }
-
-  &__input {
-    flex: 1;
-    padding: 0.5rem 1rem;
-    border: 1px solid $accent;
-    border-radius: 999px;
-    background: #fff;
-    color: $accent;
-    font: inherit;
+    color: #800000;
+    font-size: 1.8rem;
+    line-height: 1.1;
   }
 }
 
-.detail__link {
+.roster__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.roster__item {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  grid-template-areas:
+    'avatar name score'
+    'avatar status score';
+  align-items: center;
+  gap: 0 12px;
+  width: 100%;
+  padding: 12px 20px;
+  border: 0;
+  border-bottom: 1px solid var(--mat-sys-outline-variant);
+  border-left: 3px solid transparent;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+
+  &:hover {
+    background: var(--mat-sys-surface);
+  }
+
+  &:focus-visible {
+    outline: 2px solid #e8b84a;
+    outline-offset: -2px;
+  }
+
+  &--active {
+    border-left-color: #800000;
+    background: rgba(128, 0, 0, 0.08);
+
+    &:hover {
+      background: rgba(128, 0, 0, 0.08);
+    }
+  }
+}
+
+.roster__item .avatar {
+  grid-area: avatar;
+}
+
+.roster__name {
+  grid-area: name;
+  font-weight: 500;
+}
+
+.roster__status {
+  grid-area: status;
+  color: var(--mat-sys-on-surface-variant);
+  font-size: 0.8rem;
+}
+
+.roster__score {
+  grid-area: score;
+  font-weight: 600;
+}
+
+.roster__empty {
+  padding: 24px 20px;
+  color: var(--mat-sys-on-surface-variant);
+  text-align: center;
+
+  strong {
+    color: #800000;
+    letter-spacing: 1px;
+  }
+}
+
+.avatar {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #f6dcd8;
+  color: #800000;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+// ---------- Student detail ----------
+.line {
+  margin: 8px 0 0;
+  overflow-wrap: anywhere;
+}
+
+.late {
+  color: #8a1c1c;
+}
+
+.link {
   padding: 0;
   border: 0;
   background: none;
-  color: $accent-strong;
+  color: var(--mat-sys-primary);
   font: inherit;
   text-decoration: underline;
   overflow-wrap: anywhere;
   cursor: pointer;
+
+  &:focus-visible {
+    outline: 2px solid #e8b84a;
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
 }
 
-.detail__late {
-  color: #b3261e;
+.grade {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+  font-weight: 600;
 }
 
-.detail__error {
-  margin: 0;
-  color: #b3261e;
+.field {
+  min-width: 0;
+  padding: 8px 12px;
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: 8px;
+  background: #fff;
+  color: inherit;
+  font: inherit;
+
+  &::placeholder {
+    color: var(--mat-sys-on-surface-variant);
+  }
+
+  &:focus-visible {
+    outline: 2px solid #e8b84a;
+    outline-offset: 1px;
+  }
+}
+
+.grade__input {
+  width: 5rem;
+}
+
+.error {
+  margin: 12px 0 0;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: #fdecea;
+  color: #8a1c1c;
   font-size: 0.85rem;
 }
 
-.comments__author {
-  margin-right: 0.5rem;
-  font-weight: 600;
+// ---------- Private comments ----------
+.comments {
+  padding: 16px 20px 20px;
+  border-top: 1px solid var(--mat-sys-outline-variant);
+
+  &__title {
+    margin: 0 0 4px;
+    font: var(--mat-sys-title-small);
+  }
+}
+
+.comment {
+  margin: 12px 0 0 4px;
+  padding-left: 12px;
+  border-left: 2px solid var(--mat-sys-outline-variant);
+
+  &__meta {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+  }
+
+  &__time {
+    color: var(--mat-sys-on-surface-variant);
+    font-size: 0.8rem;
+  }
+
+  &__body {
+    margin: 4px 0 0;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+}
+
+.composer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+
+  .field {
+    flex: 1;
+  }
+}
+
+// ---------- States ----------
+.empty {
+  margin: 0;
+  padding: 56px 16px;
+  border: 2px dashed var(--mat-sys-outline-variant);
+  border-radius: 12px;
+  background: #fff;
+  color: var(--mat-sys-on-surface-variant);
+  text-align: center;
+}
+
+@media (max-width: 900px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
 }

@@ -1,306 +1,203 @@
-@use '../../../shared/styles/stripes';
-
-$accent: #f4847b;
-$bg: #fff9f9;
-$font-heading: 'The Seasons', serif;
-$font-body: 'TT Drugs', 'Poppins', sans-serif;
-
-:host {
-  display: block;
-  height: 100vh;
-  font-family: $font-body;
+.page {
+  max-width: 1100px;
+  margin: 0 auto;
+  // No padding here: the shell's .content already adds it.
 }
 
-.layout {
-  height: 100%;
-  background: $bg;
-  --mat-sidenav-container-shape: 0;
-  --mat-sidenav-container-width: 18rem;
-
-  &__sidenav {
-    display: flex;
-    flex-direction: column;
-    width: 18rem;
-    padding: 0;
-    border-right: 0;
-    border-radius: 0 !important;
-    background: linear-gradient(90deg, $bg calc(100% - 1.1rem), #ffbdb5 calc(100% - 1.1rem));
-
-    /* Material's inner wrapper is what shows the scrollbar, so lock it */
-    ::ng-deep .mat-drawer-inner-container {
-      display: flex;
-      flex-direction: column;
-      height: 100%;
-      overflow: hidden !important;
-      padding: 1rem 2.25rem 1rem 1rem; /* right side leaves room for the coral stripe */
-      box-sizing: border-box;
-    }
-  }
-
-  &__brand {
-    display: flex;
-    align-items: center;
-    justify-content: center;   /* centers the whole logo */
-    gap: 0.75rem;
-    margin-bottom: 1.25rem;
-    padding: 0;
-    flex: none;
-  }
-
-  &__symbol {
-    flex: none;
-    height: 46px;
-    width: auto;
-  }
-
-  &__divider {
-    flex: none;
-    width: 2px;
-    height: 40px;
-    background-color: $accent;
-  }
-
-  &__wordmark {
-    flex: 0 1 auto;
-    min-width: 0;
-    width: 150px;     /* make this bigger or smaller to taste */
-    height: auto;
-    object-fit: contain;
-  }
-
-  &__back {
-    flex-shrink: 0;
-    margin-bottom: 0.75rem;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border: 1px solid $accent !important;
-    color: $accent !important;
-    border-radius: 999px !important;
-    padding: 0.5rem 1rem !important;
-    text-decoration: none;
-    font-size: 0.9rem;
-    font-weight: 600;
-    width: max-content;
-    transition: background 0.2s;
-
-    &:hover {
-      background: rgba($accent, 0.1) !important;
-    }
-  }
-
-  &__nav {
-        flex: 1;
-    min-height: 0;          /* lets the nav shrink instead of pushing the page taller */
-    overflow-y: auto;
-    scrollbar-width: none;  /* hide the scrollbar (Firefox) */
-    &::-webkit-scrollbar { display: none; }  /* hide it (Chrome/Edge) */
-   
-    /* each link is a soft pill */
-    ::ng-deep .mat-mdc-list-item {
-      margin-bottom: 4px;
-      border-radius: 999px !important;
-      transition: background-color 0.18s ease;
-    }
-
-    /* remove Material's muddy hover/press overlay */
-    ::ng-deep .mat-mdc-list-item::before,
-    ::ng-deep .mat-mdc-list-item .mdc-list-item__ripple::before {
-      background-color: transparent !important;
-      opacity: 0 !important;
-    }
-
-    /* normal text */
-    ::ng-deep .mat-mdc-list-item .mdc-list-item__primary-text {
-      color: #7a4a46 !important;
-      font-weight: 500;
-      transition: color 0.18s ease;
-    }
-
-    /* hover */
-    ::ng-deep .mat-mdc-list-item:hover {
-      background-color: rgba($accent, 0.12) !important;
-    }
-
-    /* active: instant, one clean color, matching text */
-    ::ng-deep .mat-mdc-list-item.is-active {
-      background-color: rgba($accent, 0.28) !important;
-    }
-    ::ng-deep .mat-mdc-list-item.is-active .mdc-list-item__primary-text {
-      color: #c4483d !important;
-      font-weight: 700;
-    }
-
-    ::ng-deep .mat-mdc-list-item-icon {
-      width: 36px !important;
-      height: 36px !important;
-      margin-right: 16px !important;
-    }
-
-    .nav-icon {
-      width: 36px !important;
-      height: 36px !important;
-      object-fit: contain;
-    }
-  }
-
-  &__user-container {
-    flex: none;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.5rem;
-    margin-top: 0.5rem;
-    padding-top: 0.75rem;
-    border-top: 1px solid rgba($accent, 0.3);
-  }
-
-  &__user-info {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-  }
-
-  &__user-name {
-    color: $accent;
-    font-weight: 600;
-    font-size: 0.9rem;
-  }
-
-  &__avatar-btn {
-    position: relative;
-    flex: none;
-    width: 48px;
-    height: 48px;
-    padding: 0;
-    background: none;
-    border: 0;
-    border-radius: 50%;
-    cursor: pointer;
-
-    &:hover .layout__avatar-badge,
-    &:focus-visible .layout__avatar-badge {
-      opacity: 1;
-    }
-  }
-
-  &__avatar {
-    display: block;
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 2px solid $accent;
-    background: #fff;
-  }
-
-  &__avatar-badge {
-    position: absolute;
-    right: -2px;
-    bottom: -2px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 20px;
-    height: 20px;
-    color: #fff;
-    background: $accent;
-    border: 2px solid #fff;
-    border-radius: 50%;
-    opacity: 0.9;
-    transition: opacity 0.2s;
-
-    svg {
-      width: 11px;
-      height: 11px;
-    }
-  }
-
-  &__content {
-    @include stripes.background(0.78);
-    margin: 0;
-    border-radius: 0;
-  }
-}
-
-.logout-pill {
-  border: 1px solid $accent;
-  color: $accent;
-  background: transparent;
-  border-radius: 999px;
-  padding: 0.15rem 0.5rem;
-  font-size: 0.75rem;
-  font-weight: 600;
-  cursor: pointer;
-  display: flex;
+.back {
+  display: inline-flex;
   align-items: center;
-  width: max-content;
+  gap: 6px;
+  margin-bottom: 12px;
+  color: #800000;
+  font-weight: 500;
+  text-decoration: none;
+
+  mat-icon {
+    width: 18px;
+    height: 18px;
+    font-size: 18px;
+  }
+
+  &:hover {
+    text-decoration: underline;
+  }
+
+  &:focus-visible {
+    outline: 2px solid #e8b84a;
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
 }
 
+// ---------- Banner (same look as the student class banner) ----------
 .banner {
+  --c1: #800000;
+  --c2: #5c0000;
   position: relative;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  min-height: 10rem;
-  padding: 1.5rem 2rem;
-  background: linear-gradient(180deg, #ecc1da, #9d8bb0); /* default cover */
+  min-height: 170px;
+  padding: 20px 24px;
+  box-sizing: border-box;
+  border-radius: 16px;
+  background-color: var(--c1);
+  background-image: linear-gradient(135deg, var(--c1), var(--c2));
+  color: #fff;
 
   &__name {
     margin: 0;
-    color: #fff;
-    font-family: $font-heading;
-    font-size: 2.25rem;
-    text-shadow: 0 1px 6px rgba(0, 0, 0, 0.25);
+    font: var(--mat-sys-headline-medium);
   }
 
   &__code {
-    margin: 0.25rem 0 0;
-    color: rgba(255, 255, 255, 0.9);
-    font-weight: 600;
+    margin: 4px 0 0;
+    font-weight: 500;
+    opacity: 0.95;
   }
 
   &__edit {
     position: absolute;
-    top: 1rem;
-    right: 1.5rem;
+    top: 14px;
+    right: 16px;
     display: inline-flex;
     align-items: center;
     gap: 6px;
     height: 36px;
-    padding: 0 16px;
-    font: inherit;
-    font-weight: 600;
-    font-size: 0.85rem;
-    color: #fff;
-    background: rgba(255, 255, 255, 0.18);
+    padding: 0 16px 0 12px;
     border: 1px solid rgba(255, 255, 255, 0.8);
     border-radius: 999px;
+    background: rgba(255, 255, 255, 0.16);
+    color: #fff;
+    font: inherit;
+    font-size: 0.85rem;
+    font-weight: 500;
     cursor: pointer;
     backdrop-filter: blur(4px);
-    transition: background 0.2s;
+    transition: background-color 0.18s ease;
 
-    svg {
+    mat-icon {
       width: 18px;
       height: 18px;
+      font-size: 18px;
     }
 
     &:hover {
-      background: rgba(255, 255, 255, 0.32);
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    &:focus-visible {
+      outline: 2px solid #e8b84a;
+      outline-offset: 2px;
     }
   }
 }
 
-/* menu look (same as the classwork menus; harmless if duplicated) */
-::ng-deep .custom-lms-menu {
-  background-color: #fff !important;
-  border: 1px solid #f4847b !important;
-  border-radius: 12px !important;
-  padding: 0.5rem !important;
+// 5 patterns, picked per section (same as the student cards)
+.banner[data-pattern='0'] {
+  background-image:
+    repeating-linear-gradient(120deg, rgba(255, 255, 255, 0.08) 0 14px, transparent 14px 28px),
+    linear-gradient(135deg, var(--c1), var(--c2));
+}
 
-  .mat-mdc-menu-item {
-    border-radius: 999px !important;
-    color: #f4847b !important;
-    font-weight: 600 !important;
+.banner[data-pattern='1'] {
+  background-size:
+    18px 18px,
+    auto;
+  background-image:
+    radial-gradient(rgba(255, 255, 255, 0.2) 2px, transparent 2.5px),
+    linear-gradient(135deg, var(--c1), var(--c2));
+}
+
+.banner[data-pattern='2'] {
+  background-image:
+    radial-gradient(circle at 85% 15%, rgba(255, 255, 255, 0.16) 0 70px, transparent 71px),
+    radial-gradient(circle at 5% 110%, rgba(255, 255, 255, 0.12) 0 90px, transparent 91px),
+    linear-gradient(135deg, var(--c1), var(--c2));
+}
+
+.banner[data-pattern='3'] {
+  background-size:
+    22px 22px,
+    22px 22px,
+    auto;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.09) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.09) 1px, transparent 1px),
+    linear-gradient(135deg, var(--c1), var(--c2));
+}
+
+.banner[data-pattern='4'] {
+  background-image:
+    repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.07) 0 8px, transparent 8px 16px),
+    repeating-linear-gradient(-45deg, rgba(255, 255, 255, 0.07) 0 8px, transparent 8px 16px),
+    linear-gradient(135deg, var(--c1), var(--c2));
+}
+
+// ---------- Section tabs ----------
+.tabs {
+  display: flex;
+  gap: 4px;
+  margin: 16px 0 20px;
+  padding: 6px;
+  overflow-x: auto;
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: 12px;
+  background: #fff;
+}
+
+.tab {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 16px;
+  border-radius: 999px;
+  color: var(--mat-sys-on-surface-variant);
+  font-weight: 500;
+  text-decoration: none;
+  transition:
+    background-color 0.18s ease,
+    color 0.18s ease;
+
+  mat-icon {
+    width: 20px;
+    height: 20px;
+    font-size: 20px;
+  }
+
+  &:hover {
+    background: rgba(128, 0, 0, 0.08);
+    color: #800000;
+  }
+
+  &:focus-visible {
+    outline: 2px solid #e8b84a;
+    outline-offset: 1px;
+  }
+
+  &.active {
+    background: #800000;
+    color: #fff;
+  }
+}
+
+// Cover menu (own class so the classwork menus are not affected).
+::ng-deep .cover-menu {
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: 12px;
+}
+
+@media (max-width: 600px) {
+  .banner {
+    min-height: 150px;
+    padding: 16px;
+  }
+
+  .banner__edit {
+    top: 10px;
+    right: 10px;
   }
 }

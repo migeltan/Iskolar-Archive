@@ -72,10 +72,13 @@ export class SubmissionsComponent implements OnInit {
   );
   protected readonly pendingCount = computed(() => this.students().length - this.submittedCount());
 
+  protected initials(student: Student): string {
+    return `${student.firstName.charAt(0)}${student.lastName.charAt(0)}`.toUpperCase();
+  }
+
   ngOnInit(): void {
     void this.load();
   }
-
   private async load(): Promise<void> {
     try {
       const [activity, students, section, subs] = await Promise.all([

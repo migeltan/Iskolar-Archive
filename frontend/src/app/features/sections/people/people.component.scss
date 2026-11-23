@@ -1,119 +1,128 @@
-$accent: #f4847b;
-$font-body: 'TT Drugs', 'Poppins', sans-serif;
-
 :host {
   display: block;
-  font-family: $font-body;
-  color: $accent;
 }
 
-.people {
-  max-width: 38rem;
-  margin: 0 auto;
-  padding: 2rem 1.5rem 3rem;
+// ---------- Ruled panel ----------
+.panel {
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: 12px;
+  background: #fff;
+}
 
-  &__empty {
-    padding: 3rem 1.5rem;
-    font-size: 1.1rem;
-    text-align: center;
-    background: #fff;
-    border: 1px dashed $accent;
-    border-radius: 16px;
-    color: #777;
+.panel-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 20px;
+  border-bottom: 1px solid var(--mat-sys-outline-variant);
 
-    strong {
-      color: $accent;
-    }
-  }
-
-  &__head {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.75rem;
-    margin-bottom: 1rem;
-  }
-
-  &__title {
+  h2 {
     margin: 0;
-    font-size: 1.6rem;
-    color: $accent;
+    font: var(--mat-sys-title-medium);
   }
+}
 
-  &__count {
-    padding: 0.2rem 0.75rem;
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: #fff;
-    background: $accent;
-    border-radius: 999px;
-  }
+.count {
+  min-width: 24px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #800000;
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-align: center;
+}
 
-  &__toolbar {
-    display: flex;
-    justify-content: center;
-    gap: 0.5rem;
-    margin-bottom: 1.5rem;
-  }
-
-  &__list {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-    margin: 0;
-    padding: 0;
-    list-style: none;
-  }
-
-  &__item {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    padding: 0.75rem 1.25rem;
-    background: #fff;
-    border: 1px solid rgba($accent, 0.5);
-    border-radius: 999px;
-    transition: transform 0.15s, box-shadow 0.15s;
-
-    &:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 14px rgba($accent, 0.18);
-    }
-  }
-
-  &__avatar {
-    display: inline-flex;
-    flex: none;
-    align-items: center;
-    justify-content: center;
-    width: 2.75rem;
-    height: 2.75rem;
-    font-weight: 700;
-    font-size: 0.95rem;
-    color: #c85a50;
-    border-radius: 50%;
-  }
-
-  &__name {
-    font-weight: 600;
-    font-size: 1.05rem;
-  }
+.head-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-left: auto;
 }
 
 .pill {
   height: 36px;
   padding: 0 18px;
-  font: inherit;
-  font-weight: 600;
-  font-size: 0.9rem;
-  color: $accent;
-  background: transparent;
-  border: 1px solid $accent;
+  border: 1px solid var(--mat-sys-outline);
   border-radius: 999px;
+  background: transparent;
+  color: var(--mat-sys-primary);
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 500;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: background-color 0.18s ease;
 
   &:hover {
-    background: rgba($accent, 0.1);
+    background: rgba(128, 0, 0, 0.08);
+  }
+
+  &:focus-visible {
+    outline: 2px solid #e8b84a;
+    outline-offset: 2px;
+  }
+}
+
+// ---------- List ----------
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--mat-sys-outline-variant);
+
+  &:last-child {
+    border-bottom: 0;
+    border-radius: 0 0 12px 12px;
+  }
+
+  &:hover {
+    background: var(--mat-sys-surface);
+  }
+}
+
+.avatar {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  color: #800000;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.name {
+  font-weight: 500;
+}
+
+// ---------- States ----------
+.empty {
+  margin: 0;
+  padding: 56px 16px;
+  border: 2px dashed var(--mat-sys-outline-variant);
+  border-radius: 12px;
+  background: #fff;
+  color: var(--mat-sys-on-surface-variant);
+  text-align: center;
+
+  strong {
+    color: #800000;
+    font-size: 1.2rem;
+    letter-spacing: 1px;
+  }
+}
+
+@media (max-width: 600px) {
+  .panel-head {
+    flex-wrap: wrap;
   }
 }

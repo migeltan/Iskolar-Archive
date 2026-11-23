@@ -1,8 +1,10 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
+import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { Router, RouterLink } from '@angular/router';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../../../core/auth/auth.service';
 import { CoursesService, courseErrorMessage } from '../../../core/services/courses';
@@ -14,6 +16,7 @@ import {
   CourseDialogComponent,
   CourseFormData,
 } from '../../../shared/course-dialog/course-dialog.component';
+import { sectionDesign } from '../../dashboard/section-design';
 import { Course } from '../../../shared/models/lms.models';
 import {
   SectionDialogComponent,
@@ -23,14 +26,13 @@ import {
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [RouterLink, MatButtonModule],
+  imports: [RouterLink, MatButtonModule, MatIconModule, MatTooltipModule],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss',
 })
 export class DashboardComponent implements OnInit {
   private readonly dialog = inject(MatDialog);
   private readonly snackBar = inject(MatSnackBar);
-  private readonly router = inject(Router);
   private readonly coursesApi = inject(CoursesService);
   protected readonly auth = inject(AuthService);
 
@@ -38,37 +40,24 @@ export class DashboardComponent implements OnInit {
   protected readonly loading = signal(true);
   protected readonly loadError = signal<string | null>(null);
 
-  protected readonly fullName = computed(() => {
-    const profile = this.auth.profile();
-    return profile?.full_name?.trim() || profile?.email || '';
-  });
-
   protected readonly greeting = computed(() => {
     const name = this.auth.profile()?.full_name?.trim();
     if (!name) {
-      return 'Welcome!';
+      return 'Welcome back';
     }
     const lastName = name.split(/\s+/).pop();
-    return `Welcome, Prof. ${lastName}!`;
+    return `Welcome back, Prof. ${lastName}`;
   });
 
-  protected readonly avatarUrl = computed(
-    () => this.auth.profile()?.avatar_url || '/assets/images/default-avatar.svg',
-  );
+  protected readonly design = sectionDesign;
 
   ngOnInit(): void {
     void this.load();
   }
 
-  protected async logout(): Promise<void> {
-    await this.auth.signOut();
-    await this.router.navigate(['/login']);
-  }
-
-  protected coverFor(course: Course): string {
-    return course.coverImageUrl
-      ? `center / cover no-repeat url("${course.coverImageUrl}")`
-      : course.coverGradient;
+  /** Uploaded cover photo with a dark wash so the white title stays readable. */
+  protected coverImage(course: Course): string {
+    return `linear-gradient(rgba(0, 0, 0, 0.35), rgba(0, 0, 0, 0.35)), center / cover no-repeat url("${course.coverImageUrl}")`;
   }
 
   protected async openAddCourse(): Promise<void> {

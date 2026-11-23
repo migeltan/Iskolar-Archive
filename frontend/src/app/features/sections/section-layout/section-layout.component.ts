@@ -1,73 +1,43 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
-import { MatListModule } from '@angular/material/list';
+import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
-import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import {
-  ActivatedRoute,
-  Router,
-  RouterLink,
-  RouterLinkActive,
-  RouterOutlet,
-} from '@angular/router';
-import { AuthService } from '../../../core/auth/auth.service';
+import { ActivatedRoute, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { CoursesService } from '../../../core/services/courses';
 import { Section } from '../../../shared/models/lms.models';
+import { sectionDesign } from '../../dashboard/section-design';
 
 const MAX_IMAGE_BYTES = 2 * 1024 * 1024; // 2 MB
 const IMAGE_TYPES = ['image/png', 'image/jpeg', 'image/webp'];
-const DEFAULT_AVATAR = 'assets/images/default-avatar.svg';
 
 @Component({
   selector: 'app-section-layout',
   standalone: true,
-  imports: [
-    MatSidenavModule,
-    MatListModule,
-    MatButtonModule,
-    MatMenuModule,
-    RouterLink,
-    RouterLinkActive,
-    RouterOutlet,
-  ],
+  imports: [MatIconModule, MatMenuModule, RouterLink, RouterLinkActive, RouterOutlet],
   templateUrl: './section-layout.component.html',
   styleUrl: './section-layout.component.scss',
 })
 export class SectionLayoutComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly snackBar = inject(MatSnackBar);
-  private readonly router = inject(Router);
   private readonly coursesApi = inject(CoursesService);
-  protected readonly auth = inject(AuthService);
-
-  protected readonly teacherName = computed(() => {
-    const profile = this.auth.profile();
-    return profile?.full_name?.trim() || profile?.email || '';
-  });
-
-  protected readonly avatarSrc = computed(() => this.auth.profile()?.avatar_url || DEFAULT_AVATAR);
 
   protected readonly sectionId = this.route.snapshot.paramMap.get('id') ?? '';
   protected readonly section = signal<Section | undefined>(undefined);
+  protected readonly design = sectionDesign(this.sectionId);
 
   protected readonly navItems = [
-    { label: 'Stream', path: 'stream', icon: 'assets/images/icon-stream.svg' },
-    { label: 'Classwork', path: 'classwork', icon: 'assets/images/icon-classwork.svg' },
-    { label: 'Grades', path: 'grades', icon: 'assets/images/icon-grades.svg' },
-    { label: 'People', path: 'people', icon: 'assets/images/icon-people.svg' },
+    { label: 'Stream', path: 'stream', icon: 'forum' },
+    { label: 'Classwork', path: 'classwork', icon: 'assignment' },
+    { label: 'Grades', path: 'grades', icon: 'grade' },
+    { label: 'People', path: 'people', icon: 'group' },
   ];
 
   ngOnInit(): void {
     void this.loadSection();
   }
 
-  protected async logout(): Promise<void> {
-    await this.auth.signOut();
-    await this.router.navigate(['/login']);
-  }
-
-  // ---------- COVER IMAGE (null = default gradient) ----------
+  // ---------- COVER IMAGE (null = the section's colour and pattern) ----------
   // Still stored in this browser only; a real cover needs a database column.
   private readonly coverKey = `section-cover:${this.sectionId}`;
   protected readonly cover = signal<string | null>(this.read(this.coverKey));
@@ -75,7 +45,7 @@ export class SectionLayoutComponent implements OnInit {
   protected readonly bannerBackground = computed(() => {
     const url = this.cover();
     return url
-      ? `linear-gradient(180deg, rgba(236,193,218,0.45), rgba(157,139,176,0.7)), url("${url}") center / cover no-repeat`
+      ? `linear-gradient(rgba(0, 0, 0, 0.35), rgba(0, 0, 0, 0.35)), center / cover no-repeat url("${url}")`
       : null;
   });
 

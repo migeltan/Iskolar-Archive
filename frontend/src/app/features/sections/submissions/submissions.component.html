@@ -1,34 +1,36 @@
 @if (loading()) {
-  <p class="submissions__missing">Loading submissions…</p>
+  <p class="empty">Loading submissions…</p>
 } @else if (loadError()) {
-  <p class="submissions__missing">{{ loadError() }}</p>
+  <p class="empty">{{ loadError() }}</p>
 } @else if (activity(); as current) {
   <section class="submissions">
-    <a
-      class="submissions__back"
-      mat-stroked-button
-      [routerLink]="['/section', sectionId, 'classwork']"
-    >
+    <a class="back" mat-stroked-button [routerLink]="['/section', sectionId, 'classwork']">
       ‹ Classwork
     </a>
 
-    <div class="submissions__layout">
-      <aside class="roster">
-        <h2 class="roster__title">Submissions</h2>
-        <div class="roster__counts">
-          <div class="count">
-            <strong class="count__number">{{ submittedCount() }}</strong>
-            submitted
-          </div>
-          <div class="count">
-            <strong class="count__number">{{ pendingCount() }}</strong>
-            pending
-          </div>
+    <div class="layout">
+      <aside class="panel roster">
+        <div class="panel-head">
+          <h2>Submissions</h2>
+          <span class="count-badge">{{ submittedCount() + pendingCount() }}</span>
         </div>
 
-        <button mat-stroked-button type="button" (click)="toggleSort()">
-          Sort ({{ ascending() ? 'A - Z' : 'Z - A' }}) last name first
-        </button>
+        <div class="roster__top">
+          <div class="counts">
+            <div class="stat">
+              <strong class="stat__number">{{ submittedCount() }}</strong>
+              submitted
+            </div>
+            <div class="stat">
+              <strong class="stat__number">{{ pendingCount() }}</strong>
+              pending
+            </div>
+          </div>
+
+          <button mat-stroked-button type="button" (click)="toggleSort()">
+            Sort ({{ ascending() ? 'A - Z' : 'Z - A' }}) last name first
+          </button>
+        </div>
 
         <ul class="roster__list">
           @for (student of sortedStudents(); track student.id) {
@@ -39,8 +41,8 @@
                 [class.roster__item--active]="student.id === selected()?.id"
                 (click)="select(student)"
               >
-                <img class="roster__avatar" src="assets/images/default-avatar.svg" alt="" />
-                <span class="roster__name"> {{ student.lastName }}, {{ student.firstName }} </span>
+                <span class="avatar" aria-hidden="true">{{ initials(student) }}</span>
+                <span class="roster__name">{{ student.lastName }}, {{ student.firstName }}</span>
                 <span class="roster__status">{{ statusOf(student) }}</span>
                 <span class="roster__score">
                   {{ scoreOf(student) ?? '_' }} / {{ current.points }}
@@ -57,93 +59,96 @@
       </aside>
 
       <div class="detail">
-        <header class="detail__activity">
-          <div class="detail__heading">
-            <h2 class="detail__title">{{ current.title }}</h2>
+        <section class="panel">
+          <div class="panel-head">
+            <h2>{{ current.title }}</h2>
             @if (current.due_at) {
-              <span class="detail__due">
-                Due {{ current.due_at | date: 'MMM d, y' }} |
-                {{ current.due_at | date: 'h:mm a' }}
+              <span class="due">
+                Due {{ current.due_at | date: 'MMM d, y' }} | {{ current.due_at | date: 'h:mm a' }}
               </span>
             }
           </div>
-          <p class="detail__details">{{ current.instructions }}</p>
-        </header>
+          @if (current.instructions) {
+            <p class="panel-text">{{ current.instructions }}</p>
+          }
+        </section>
 
         @if (selected(); as student) {
-          <div class="detail__student">
-            <div class="detail__student-header">
-              <img class="roster__avatar" src="assets/images/default-avatar.svg" alt="" />
-              <span class="detail__student-name">
-                {{ student.lastName }}, {{ student.firstName }}
-              </span>
+          <section class="panel">
+            <div class="panel-head">
+              <span class="avatar" aria-hidden="true">{{ initials(student) }}</span>
+              <h2>{{ student.lastName }}, {{ student.firstName }}</h2>
             </div>
 
-            @if (selectedRow(); as sub) {
-              @if (sub.submitted_at) {
-                <p class="detail__file">
-                  Submitted {{ sub.submitted_at | date: 'MMM d, y, h:mm a' }}
-                  @if (isLate(sub)) {
-                    <strong class="detail__late"> · Late</strong>
-                  }
-                </p>
+            <div class="panel-body">
+              @if (selectedRow(); as sub) {
+                @if (sub.submitted_at) {
+                  <p class="line">
+                    Submitted {{ sub.submitted_at | date: 'MMM d, y, h:mm a' }}
+                    @if (isLate(sub)) {
+                      <strong class="late"> · Late</strong>
+                    }
+                  </p>
+                } @else {
+                  <p class="line">No work submitted. This grade was entered by you.</p>
+                }
+                @if (sub.answer_text) {
+                  <p class="line">
+                    Link:
+                    <a
+                      class="link"
+                      [href]="sub.answer_text"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      >{{ sub.answer_text }}</a
+                    >
+                  </p>
+                }
+                @for (file of sub.attachments; track file.id) {
+                  <p class="line">
+                    File:
+                    <button type="button" class="link" (click)="openFile(file)">
+                      {{ file.file_name }}
+                    </button>
+                  </p>
+                }
               } @else {
-                <p class="detail__file">No work submitted. This grade was entered by you.</p>
+                <p class="line">No work submitted yet.</p>
               }
-              @if (sub.answer_text) {
-                <p class="detail__file">
-                  Link:
-                  <a
-                    class="detail__link"
-                    [href]="sub.answer_text"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    >{{ sub.answer_text }}</a
-                  >
-                </p>
-              }
-              @for (file of sub.attachments; track file.id) {
-                <p class="detail__file">
-                  File:
-                  <button type="button" class="detail__link" (click)="openFile(file)">
-                    {{ file.file_name }}
-                  </button>
-                </p>
-              }
-            } @else {
-              <p class="detail__file">No work submitted yet.</p>
-            }
 
-            <label class="detail__grade">
-              Grade:
-              <input
-                class="detail__grade-input"
-                type="number"
-                min="0"
-                [max]="current.points"
-                [value]="scoreOf(student) ?? ''"
-                (change)="setScore(student, $event)"
-              />
-              / {{ current.points }}
-            </label>
-            @if (saveError()) {
-              <p class="detail__error" role="alert">{{ saveError() }}</p>
-            }
+              <label class="grade">
+                Grade:
+                <input
+                  class="field grade__input"
+                  type="number"
+                  min="0"
+                  [max]="current.points"
+                  [value]="scoreOf(student) ?? ''"
+                  (change)="setScore(student, $event)"
+                />
+                / {{ current.points }}
+              </label>
+              @if (saveError()) {
+                <p class="error" role="alert">{{ saveError() }}</p>
+              }
+            </div>
 
             <div class="comments">
               <h3 class="comments__title">Private comments</h3>
               @for (comment of comments(); track comment.id) {
-                <p class="comments__item">
-                  <span class="comments__author">{{ comment.author_name }}</span>
-                  {{ comment.body }}
-                  <span class="comments__time">
-                    {{ comment.created_at | date: 'MMM d, h:mm a' }}
-                  </span>
-                </p>
+                <div class="comment">
+                  <div class="comment__meta">
+                    <strong>{{ comment.author_name }}</strong>
+                    <span class="comment__time">
+                      {{ comment.created_at | date: 'MMM d, h:mm a' }}
+                    </span>
+                  </div>
+                  <p class="comment__body">{{ comment.body }}</p>
+                </div>
               }
-              <div class="comments__composer">
+              <div class="composer">
                 <input
-                  class="comments__input"
+                  class="field"
                   type="text"
                   placeholder="Write a comment..."
                   aria-label="Write a comment"
@@ -154,14 +159,14 @@
                 <button mat-stroked-button type="button" (click)="addComment()">Post</button>
               </div>
             </div>
-          </div>
+          </section>
         }
       </div>
     </div>
   </section>
 } @else {
-  <p class="submissions__missing">
+  <p class="empty">
     That activity wasn't found in this section.
-    <a [routerLink]="['/section', sectionId, 'classwork']">Back to Classwork</a>
+    <a class="link" [routerLink]="['/section', sectionId, 'classwork']">Back to Classwork</a>
   </p>
 }

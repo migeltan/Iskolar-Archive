@@ -1,10 +1,8 @@
 <section class="classwork">
   <!-- TOP TOOLBAR -->
-  <div class="classwork__toolbar">
-    <button mat-stroked-button class="create-btn" [matMenuTriggerFor]="createMenu">
-      <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-        <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
-      </svg>
+  <div class="toolbar">
+    <button mat-flat-button type="button" [matMenuTriggerFor]="createMenu">
+      <mat-icon>add</mat-icon>
       Create
     </button>
     <mat-menu #createMenu="matMenu" panelClass="custom-lms-menu">
@@ -18,24 +16,25 @@
 
   <!-- TOPICS LOOP (first group is the renamable default) -->
   @if (loading()) {
-    <p class="topic__empty">Loading…</p>
+    <p class="msg">Loading…</p>
   }
 
   @for (group of groups(); track group.name ?? 'default-group') {
-    <div class="topic">
-      <div class="topic__header">
-        <h2 class="topic__name">{{ group.name ?? defaultTopicName() }}</h2>
+    <section class="panel">
+      <div class="panel-head">
+        <h2>{{ group.name ?? defaultTopicName() }}</h2>
+        <span class="count">{{ group.items.length }}</span>
 
-        <div class="topic__actions">
+        <div class="head-actions">
           <button
             type="button"
-            class="icon-button"
+            mat-icon-button
+            class="act"
             aria-label="Add"
+            title="Add"
             [matMenuTriggerFor]="topicAddMenu"
           >
-            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-              <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
-            </svg>
+            <mat-icon>add</mat-icon>
           </button>
           <mat-menu #topicAddMenu="matMenu" panelClass="custom-lms-menu">
             <button mat-menu-item type="button" (click)="openCreate('Material', group.name)">
@@ -48,114 +47,101 @@
 
           <button
             type="button"
-            class="icon-button"
+            mat-icon-button
+            class="act"
             aria-label="Rename"
+            title="Rename"
             (click)="editTopic(group.name)"
           >
-            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-              <path
-                d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 000-1.41l-2.34-2.34a1 1 0 00-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"
-              />
-            </svg>
+            <mat-icon>edit</mat-icon>
           </button>
 
           <button
             type="button"
-            class="icon-button"
+            mat-icon-button
+            class="act"
             aria-label="Delete"
+            title="Delete"
             (click)="deleteTopic(group.name)"
           >
-            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-              <path
-                d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"
-              />
-            </svg>
+            <mat-icon>delete</mat-icon>
           </button>
         </div>
       </div>
 
-      @for (item of group.items; track item.id) {
-        <article class="item-card">
-          <header class="item-card__header">
-            <span class="item-card__kind">{{ item.kind }}</span>
-            @if (item.dueAt) {
-              <span class="item-card__due">
-                Due {{ item.dueAt | date: 'MMM d, y' }} | {{ item.dueAt | date: 'h:mm a' }}
-              </span>
+      <div class="panel-body">
+        @for (item of group.items; track item.id) {
+          <article class="item">
+            <header class="item__header">
+              <span class="kind">{{ item.kind }}</span>
+              @if (item.dueAt) {
+                <span class="item__due">
+                  Due {{ item.dueAt | date: 'MMM d, y' }} | {{ item.dueAt | date: 'h:mm a' }}
+                </span>
+              }
+
+              <div class="item__actions">
+                <button
+                  type="button"
+                  mat-icon-button
+                  class="act"
+                  aria-label="Edit"
+                  title="Edit"
+                  (click)="openEdit(item)"
+                >
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button
+                  type="button"
+                  mat-icon-button
+                  class="act"
+                  aria-label="Delete"
+                  title="Delete"
+                  (click)="confirmDelete(item)"
+                >
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
+            </header>
+
+            <h3 class="item__title">{{ item.title }}</h3>
+            @if (item.details) {
+              <p class="item__details">{{ item.details }}</p>
             }
 
-            <div class="item-card__actions">
-              <button type="button" class="icon-button" aria-label="Edit" (click)="openEdit(item)">
-                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                  <path
-                    d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 000-1.41l-2.34-2.34a1 1 0 00-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"
-                  />
-                </svg>
-              </button>
-              <button
-                type="button"
-                class="icon-button"
-                aria-label="Delete"
-                (click)="confirmDelete(item)"
-              >
-                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                  <path
-                    d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"
-                  />
-                </svg>
-              </button>
+            <div class="item__footer">
+              @for (file of item.files; track file.id) {
+                <button type="button" mat-stroked-button (click)="openFile(file)">
+                  <mat-icon>attach_file</mat-icon>
+                  {{ file.fileName }}
+                </button>
+              }
+              @if (item.linkUrl) {
+                <a
+                  mat-stroked-button
+                  [href]="item.linkUrl"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <mat-icon>link</mat-icon>
+                  Open link
+                </a>
+              }
+              @if (item.kind === 'Activity') {
+                <a
+                  mat-stroked-button
+                  [routerLink]="['/section', sectionId, 'submissions', item.id]"
+                >
+                  <mat-icon>assignment_turned_in</mat-icon>
+                  Open submissions
+                </a>
+              }
             </div>
-          </header>
-
-          <h3 class="item-card__title">{{ item.title }}</h3>
-          <p class="item-card__details">{{ item.details }}</p>
-
-          <div class="item-card__footer">
-            @for (file of item.files; track file.id) {
-              <button type="button" class="action-pill" mat-stroked-button (click)="openFile(file)">
-                <svg class="pill-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                  <path
-                    d="M16.5 6v11.5a4 4 0 01-8 0V5a2.5 2.5 0 015 0v10.5a1 1 0 01-2 0V6H10v9.5a2.5 2.5 0 005 0V5a4 4 0 00-8 0v12.5a5.5 5.5 0 0011 0V6h-1.5z"
-                  />
-                </svg>
-                {{ file.fileName }}
-              </button>
-            }
-            @if (item.linkUrl) {
-              <a
-                class="action-pill"
-                mat-stroked-button
-                [href]="item.linkUrl"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <svg class="pill-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                  <path
-                    d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7a5 5 0 000 10h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4a5 5 0 000-10z"
-                  />
-                </svg>
-                Open link
-              </a>
-            }
-            @if (item.kind === 'Activity') {
-              <a
-                class="action-pill"
-                mat-stroked-button
-                [routerLink]="['/section', sectionId, 'submissions', item.id]"
-              >
-                <svg class="pill-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                  <path
-                    d="M19 3h-4.18C14.4 1.84 13.3 1 12 1s-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm2 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"
-                  />
-                </svg>
-                Open submissions
-              </a>
-            }
-          </div>
-        </article>
-      } @empty {
-        <p class="topic__empty">Nothing here yet.</p>
-      }
-    </div>
+          </article>
+        } @empty {
+          <p class="msg">Nothing here yet.</p>
+        }
+      </div>
+    </section>
   }
 </section>

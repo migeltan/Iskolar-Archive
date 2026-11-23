@@ -1,39 +1,39 @@
 <section class="people">
   @if (loading()) {
-    <p class="people__empty">Loading students…</p>
+    <p class="empty">Loading students…</p>
   } @else if (loadError(); as message) {
-    <p class="people__empty" role="alert">{{ message }}</p>
+    <p class="empty" role="alert">{{ message }}</p>
   } @else if (students().length === 0) {
-    <p class="people__empty">
+    <p class="empty">
       No students have joined yet. Share the Section Code:
       <strong>{{ sectionCode() }}</strong> with your class.
     </p>
   } @else {
-    <header class="people__head">
-      <h2 class="people__title">Classmates</h2>
-      <span class="people__count">
-        {{ sortedStudents().length === 1 ? '1 student' : sortedStudents().length + ' students' }}
-      </span>
-    </header>
+    <div class="panel">
+      <div class="panel-head">
+        <h2>Students</h2>
+        <span class="count">{{ sortedStudents().length }}</span>
 
-    <div class="people__toolbar">
-      <button type="button" class="pill" (click)="toggleSortKey()">
-        Sort by: {{ sortBy() === 'lastName' ? 'Last name' : 'First name' }}
-      </button>
-      <button type="button" class="pill" (click)="toggleSortOrder()">
-        {{ ascending() ? 'A – Z' : 'Z – A' }}
-      </button>
+        <div class="head-actions">
+          <button type="button" class="pill" (click)="toggleSortKey()">
+            Sort by: {{ sortBy() === 'lastName' ? 'Last name' : 'First name' }}
+          </button>
+          <button type="button" class="pill" (click)="toggleSortOrder()">
+            {{ ascending() ? 'A – Z' : 'Z – A' }}
+          </button>
+        </div>
+      </div>
+
+      <ul class="list">
+        @for (student of sortedStudents(); track student.id; let i = $index) {
+          <li class="item">
+            <span class="avatar" [style.background]="avatarColor(i)">
+              {{ initials(student) }}
+            </span>
+            <span class="name">{{ displayName(student) }}</span>
+          </li>
+        }
+      </ul>
     </div>
-
-    <ul class="people__list">
-      @for (student of sortedStudents(); track student.id; let i = $index) {
-        <li class="people__item">
-          <span class="people__avatar" [style.background]="avatarColor(i)">
-            {{ initials(student) }}
-          </span>
-          <span class="people__name">{{ displayName(student) }}</span>
-        </li>
-      }
-    </ul>
   }
 </section>

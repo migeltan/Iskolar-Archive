@@ -1,109 +1,113 @@
-<header class="topbar">
-  <div class="topbar__brand">
-    <img class="topbar__symbol" src="/assets/images/logo-symbol.svg" alt="Symbol" />
-    <span class="topbar__divider" aria-hidden="true"></span>
-    <img class="topbar__wordmark" src="/assets/images/logo-text.svg" alt="Iskolar's Archive" />
-  </div>
-
-  <div class="topbar__user">
-    <div class="topbar__identity">
-      <div class="user-stack">
-        <span class="topbar__name">{{ fullName() }}</span>
-        <button mat-stroked-button type="button" class="logout-btn" (click)="logout()">
-          <img src="/assets/images/icon-logout.svg" alt="Logout" class="btn-icon" />
-          <span>Log out</span>
-        </button>
-      </div>
+<div class="page">
+  <header class="page-header">
+    <div>
+      <h1>{{ greeting() }}</h1>
+      <p class="subtitle">
+        @if (!loading() && courses().length === 0) {
+          Add your first course to start creating sections and posting materials.
+        } @else {
+          Pick a section to open its stream, classwork, grades and people.
+        }
+      </p>
     </div>
-    <img class="topbar__avatar" src="/assets/images/default-avatar.svg" alt="Avatar" />
-  </div>
-</header>
+    <button mat-flat-button type="button" (click)="openAddCourse()">
+      <mat-icon>add</mat-icon>
+      Add course
+    </button>
+  </header>
 
-<main class="dashboard">
-  <h1 class="dashboard__welcome">{{ greeting() }}</h1>
-
-  <section class="courses">
-    <div class="courses__header">
-      <h2 class="courses__heading">My courses</h2>
-      <button mat-stroked-button type="button" class="add-btn" (click)="openAddCourse()">
-        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-          <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
-        </svg>
-        <span>ADD COURSE</span>
+  @if (loading()) {
+    <p class="status" role="status">Loading your courses…</p>
+  } @else if (loadError(); as message) {
+    <p class="status" role="alert">{{ message }}</p>
+  } @else if (courses().length === 0) {
+    <div class="empty">
+      <mat-icon class="empty-icon">menu_book</mat-icon>
+      <h2>You don't have any courses yet</h2>
+      <p>Add a course first, then create a section for each class you teach.</p>
+      <button mat-flat-button type="button" (click)="openAddCourse()">
+        <mat-icon>add</mat-icon>
+        Add course
       </button>
     </div>
-
-    @if (loading()) {
-      <p class="courses__status">Loading your courses…</p>
-    } @else if (loadError(); as message) {
-      <p class="courses__status" role="alert">{{ message }}</p>
-    } @else if (courses().length === 0) {
-      <div class="courses__empty">
-        <p>
-          You don't have any courses yet. To start creating classes and posting materials, you need
-          to add a course first.
-        </p>
-        <button mat-stroked-button type="button" class="add-btn" (click)="openAddCourse()">
-          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-            <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
-          </svg>
-          <span>ADD COURSE</span>
-        </button>
+  } @else {
+    <section class="panel">
+      <div class="panel-head">
+        <h2>My courses</h2>
+        <span class="count">{{ courses().length }}</span>
       </div>
-    } @else {
-      <div class="courses__grid">
+
+      <div class="courses">
         @for (course of courses(); track course.id) {
           <article class="course-card">
-            <div class="course-card__cover" [style.background]="coverFor(course)">
-              <h3 class="course-card__title">{{ course.title }}</h3>
+            <div
+              class="banner"
+              [class.has-image]="!!course.coverImageUrl"
+              [style.--c1]="design(course.id).c1"
+              [style.--c2]="design(course.id).c2"
+              [attr.data-pattern]="design(course.id).pattern"
+              [style.background]="course.coverImageUrl ? coverImage(course) : null"
+            >
+              <h3 class="title">{{ course.title }}</h3>
+              <p class="code">{{ course.code }}</p>
 
-              <div class="course-card__actions">
+              <div class="banner-actions">
                 <button
                   class="round-btn"
                   type="button"
                   aria-label="Edit course"
+                  matTooltip="Edit course"
                   (click)="openEditCourse(course)"
                 >
-                  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                    <path
-                      d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 000-1.41l-2.34-2.34a1 1 0 00-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"
-                    />
-                  </svg>
+                  <mat-icon>edit</mat-icon>
                 </button>
                 <button
                   class="round-btn"
                   type="button"
                   aria-label="Delete course"
+                  matTooltip="Delete course"
                   (click)="confirmDelete(course)"
                 >
-                  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                    <path
-                      d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"
-                    />
-                  </svg>
+                  <mat-icon>delete</mat-icon>
                 </button>
               </div>
             </div>
 
-            <ul class="course-card__sections">
+            <ul class="sections">
               @for (section of course.sections; track section.id) {
                 <li class="section-row">
                   <a class="section-name" [routerLink]="['/section', section.id, 'stream']">
                     {{ section.name }}
                   </a>
                   <div class="section-icons">
-                    <a [routerLink]="['/section', section.id, 'stream']" class="icon-btn"
-                      ><img src="/assets/images/icon-stream.svg" alt="Stream"
-                    /></a>
-                    <a [routerLink]="['/section', section.id, 'classwork']" class="icon-btn"
-                      ><img src="/assets/images/icon-classwork.svg" alt="Classwork"
-                    /></a>
-                    <a [routerLink]="['/section', section.id, 'grades']" class="icon-btn"
-                      ><img src="/assets/images/icon-grades.svg" alt="Grades"
-                    /></a>
-                    <a [routerLink]="['/section', section.id, 'people']" class="icon-btn"
-                      ><img src="/assets/images/icon-people.svg" alt="People"
-                    /></a>
+                    <a
+                      class="icon-link"
+                      [routerLink]="['/section', section.id, 'stream']"
+                      aria-label="Stream"
+                      matTooltip="Stream"
+                      ><mat-icon>forum</mat-icon></a
+                    >
+                    <a
+                      class="icon-link"
+                      [routerLink]="['/section', section.id, 'classwork']"
+                      aria-label="Classwork"
+                      matTooltip="Classwork"
+                      ><mat-icon>assignment</mat-icon></a
+                    >
+                    <a
+                      class="icon-link"
+                      [routerLink]="['/section', section.id, 'grades']"
+                      aria-label="Grades"
+                      matTooltip="Grades"
+                      ><mat-icon>grade</mat-icon></a
+                    >
+                    <a
+                      class="icon-link"
+                      [routerLink]="['/section', section.id, 'people']"
+                      aria-label="People"
+                      matTooltip="People"
+                      ><mat-icon>group</mat-icon></a
+                    >
                   </div>
                 </li>
               } @empty {
@@ -111,22 +115,15 @@
               }
             </ul>
 
-            <div class="course-card__footer">
-              <button
-                mat-stroked-button
-                type="button"
-                class="create-btn"
-                (click)="createSection(course)"
-              >
-                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                  <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
-                </svg>
-                <span>CREATE SECTION</span>
+            <div class="card-foot">
+              <button mat-stroked-button type="button" (click)="createSection(course)">
+                <mat-icon>add</mat-icon>
+                Create section
               </button>
             </div>
           </article>
         }
       </div>
-    }
-  </section>
-</main>
+    </section>
+  }
+</div>

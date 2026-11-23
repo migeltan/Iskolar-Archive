@@ -1,76 +1,92 @@
-<div class="stream-container">
-  <!-- START A POST -->
-  <div class="post-box">
-    <div class="post-header">START A POST</div>
+<!-- START A POST -->
+<section class="panel">
+  <div class="panel-head">
+    <mat-icon>edit_note</mat-icon>
+    <h2>Start a post</h2>
+  </div>
+  <div class="panel-body composer">
     <input
       type="text"
-      class="post-input"
+      class="field"
       placeholder="Announce something to your class..."
       maxlength="5000"
       [value]="newPost()"
       (input)="newPost.set($any($event.target).value)"
       (keyup.enter)="submitPost()"
     />
-    <div class="post-footer">
-      <button class="post-btn" (click)="submitPost()" [disabled]="!newPost().trim() || posting()">
-        {{ posting() ? 'POSTING…' : 'POST' }}
-      </button>
-    </div>
+    <button
+      type="button"
+      class="pill"
+      (click)="submitPost()"
+      [disabled]="!newPost().trim() || posting()"
+    >
+      {{ posting() ? 'Posting…' : 'Post' }}
+    </button>
   </div>
+</section>
 
-  @if (error()) {
-    <div class="feed-error" role="alert">{{ error() }}</div>
-  }
+@if (error()) {
+  <p class="feed-error" role="alert">{{ error() }}</p>
+}
 
-  <!-- FEED -->
-  <div class="feed">
+<!-- FEED -->
+<section class="panel">
+  <div class="panel-head">
+    <mat-icon>campaign</mat-icon>
+    <h2>Announcements</h2>
+    @if (!loading()) {
+      <span class="count">{{ posts().length }}</span>
+    }
+  </div>
+  <div class="panel-body">
     @if (loading()) {
-      <div class="feed-empty">Loading posts…</div>
+      <p class="msg">Loading posts…</p>
     } @else if (posts().length === 0) {
-      <div class="feed-empty">No posts available. Create one above.</div>
+      <p class="msg">No posts yet. Write one above.</p>
     }
 
     @for (post of posts(); track post.id) {
-      <div class="feed-item">
-        <div class="feed-header">
-          <span class="author">{{ teacherName() }}</span>
-          <span class="date">{{ post.createdAt | date: 'MMM d, y, h:mm a' }}</span>
-          <button type="button" class="delete-btn" (click)="deletePost(post)">Delete</button>
-        </div>
-        <div class="feed-content">{{ post.body }}</div>
+      <article class="post">
+        <header>
+          <strong>{{ teacherName() }}</strong>
+          <span class="when">{{ post.createdAt | date: 'MMM d, y, h:mm a' }}</span>
+          <button type="button" class="link push" (click)="deletePost(post)">Delete</button>
+        </header>
+        <p class="body">{{ post.body }}</p>
 
-        <div class="comments">
-          @for (comment of post.comments; track comment.id) {
-            <div class="comment">
-              <span class="comment__author">{{ comment.authorName }}</span>
-              <span class="comment__date">{{ comment.createdAt | date: 'MMM d, y, h:mm a' }}</span>
-              <button type="button" class="delete-btn" (click)="deleteComment(post, comment)">
+        @for (comment of post.comments; track comment.id) {
+          <div class="comment">
+            <div class="meta">
+              <strong>{{ comment.authorName }}</strong>
+              <span class="when">{{ comment.createdAt | date: 'MMM d, y, h:mm a' }}</span>
+              <button type="button" class="link" (click)="deleteComment(post, comment)">
                 Delete
               </button>
-              <p class="comment__text">{{ comment.body }}</p>
             </div>
-          }
-
-          <div class="comment-box">
-            <input
-              type="text"
-              class="comment-input"
-              placeholder="Add a comment..."
-              maxlength="2000"
-              [value]="draft(post.id)"
-              (input)="setDraft(post.id, $any($event.target).value)"
-              (keyup.enter)="addComment(post)"
-            />
-            <button
-              class="comment-btn"
-              (click)="addComment(post)"
-              [disabled]="!draft(post.id).trim()"
-            >
-              POST
-            </button>
+            <p class="body">{{ comment.body }}</p>
           </div>
+        }
+
+        <div class="add">
+          <input
+            type="text"
+            class="field"
+            placeholder="Add a comment..."
+            maxlength="2000"
+            [value]="draft(post.id)"
+            (input)="setDraft(post.id, $any($event.target).value)"
+            (keyup.enter)="addComment(post)"
+          />
+          <button
+            type="button"
+            class="send"
+            (click)="addComment(post)"
+            [disabled]="!draft(post.id).trim()"
+          >
+            Post
+          </button>
         </div>
-      </div>
+      </article>
     }
   </div>
-</div>
+</section>

@@ -1,193 +1,128 @@
-$accent: #f4847b;
-
-.classwork {
-  padding: 2rem;
-  max-width: 1000px;
-  margin: 0 auto;
+.toolbar {
+  margin-bottom: 20px;
 }
 
-/* --- TOP TOOLBAR --- */
-.classwork__toolbar {
-  margin-bottom: 2rem;
+.msg {
+  margin: 16px 0;
+  color: var(--mat-sys-on-surface-variant);
 }
 
-.create-btn {
-  border: 1px solid $accent !important;
-  color: $accent !important;
-  border-radius: 999px !important;
-  background: transparent !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  gap: 6px !important;
-  padding: 0 16px !important;
-  height: 40px !important;
-  font-weight: 600 !important;
-
-  .btn-icon {
-    width: 20px;
-    height: 20px;
-    flex: none;
-  }
-}
-
-/* --- TOPIC CONTAINER --- */
-.topic {
-  background: $accent;
-  border-radius: 16px;
-  padding: 1.5rem;
-  margin-bottom: 2rem;
-  width: 100%;
-  box-sizing: border-box;
-  /* no overflow: hidden here, or it will cut off the menus */
-}
-
-.topic__header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
-}
-
-.topic__name {
-  color: #ffffff;
-  font-family: 'TT Drugs', sans-serif;
-  font-size: 1.3rem;
-  margin: 0;
-}
-
-.topic__actions {
-  display: flex;
-  gap: 0.5rem;
-}
-
-/* --- ICON BUTTONS (white by default, coral inside cards) --- */
-.icon-button {
-  flex: none;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  padding: 0;
-  border-radius: 50%;
-  border: 1.5px solid currentColor;
-  background: transparent;
-  color: #ffffff;
-  cursor: pointer;
-  transition: background 0.2s;
-
-  svg {
-    width: 22px;
-    height: 22px;
-    display: block;
-  }
-
-  &:hover {
-    background: rgba(255, 255, 255, 0.2);
-  }
-}
-
-/* --- ITEM CARD --- */
-.item-card {
-  background: #ffffff;
+// ---------- Ruled panel (one per topic) ----------
+.panel {
+  margin-bottom: 20px;
+  border: 1px solid var(--mat-sys-outline-variant);
   border-radius: 12px;
-  padding: 1.5rem;
-  margin-bottom: 1rem;
-  border: 1px solid $accent;
+  background: #fff;
+  // no overflow: hidden here, or it will cut off the menus
+}
+
+.panel-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px 8px 20px;
+  border-bottom: 1px solid var(--mat-sys-outline-variant);
+
+  h2 {
+    margin: 0;
+    font: var(--mat-sys-title-medium);
+  }
+}
+
+.count {
+  min-width: 24px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #800000;
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.head-actions {
+  display: flex;
+  margin-left: auto;
+}
+
+.panel-body {
+  padding: 16px 20px;
+}
+
+.act {
+  color: var(--mat-sys-primary);
+}
+
+// ---------- Item card ----------
+.item {
+  margin-bottom: 12px;
+  padding: 14px 16px;
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: 12px;
+  background: var(--mat-sys-surface);
+
+  &:last-child {
+    margin-bottom: 0;
+  }
 
   &__header {
     display: flex;
     align-items: center;
-    gap: 1rem;
-    margin-bottom: 1rem;
-  }
-
-  &__kind {
-    color: $accent;
-    font-weight: 600;
-    font-size: 0.9rem;
+    gap: 12px;
+    min-height: 40px;
   }
 
   &__due {
-    color: $accent;
+    color: var(--mat-sys-on-surface-variant);
     font-size: 0.85rem;
   }
 
   &__actions {
     display: flex;
-    gap: 0.5rem;
     margin-left: auto;
   }
 
   &__title {
-    color: $accent;
-    font-size: 1.3rem;
-    margin: 0.5rem 0;
+    margin: 4px 0 0;
+    font: var(--mat-sys-title-medium);
   }
 
   &__details {
-    color: #777;
-    margin-bottom: 1.5rem;
+    margin: 6px 0 0;
+    color: var(--mat-sys-on-surface-variant);
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
   }
 
   &__footer {
     display: flex;
-    justify-content: flex-end;
-    gap: 1rem;
-  }
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 14px;
 
-  .icon-button {
-    color: $accent;
-
-    &:hover {
-      background: rgba(244, 132, 123, 0.12);
+    &:empty {
+      display: none;
     }
   }
 }
 
-/* --- PILL BUTTONS --- */
-.action-pill {
-  border: 1px solid $accent !important;
-  color: $accent !important;
-  border-radius: 999px !important;
-  background: transparent !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  gap: 6px !important;
-  padding: 0 16px !important;
-  height: 36px !important;
-  font-weight: 600 !important;
-
-  .pill-icon {
-    width: 18px;
-    height: 18px;
-    flex: none;
-  }
+.kind {
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: rgba(128, 0, 0, 0.1);
+  color: #800000;
+  font-size: 0.75rem;
+  font-weight: 600;
 }
 
-/* --- DROPDOWN MENUS --- */
+// ---------- Dropdown menus ----------
 ::ng-deep .custom-lms-menu {
-  background-color: #ffffff !important;
-  border: 1px solid #f4847b !important;
-  border-radius: 12px !important;
-  padding: 0.5rem !important;
-  box-shadow: 0 4px 12px rgba(244, 132, 123, 0.15) !important;
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: 12px;
+}
 
-  .mat-mdc-menu-item {
-    border-radius: 999px !important;
-    margin-bottom: 4px;
-    font-family: 'TT Drugs', 'Poppins', sans-serif !important;
-    color: #f4847b !important;
-    font-weight: 600 !important;
-    transition: background 0.2s;
-
-    &:hover {
-      background-color: rgba(244, 132, 123, 0.1) !important;
-    
-  .topic__empty {
-    color: #ffffff;
-    margin: 0;
-  }
-    }
+@media (max-width: 600px) {
+  .panel-head {
+    flex-wrap: wrap;
   }
 }

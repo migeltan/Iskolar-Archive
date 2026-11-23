@@ -1,83 +1,57 @@
-<mat-sidenav-container class="layout">
-  <mat-sidenav class="layout__sidenav" mode="side" opened disableClose>
-    <!-- BRAND LOGO -->
-    <div class="layout__brand">
-      <img class="layout__symbol" src="/assets/images/logo-symbol.svg" alt="Symbol" />
-      <span class="layout__divider" aria-hidden="true"></span>
-      <img class="layout__wordmark" src="/assets/images/logo-text.svg" alt="Wordmark" />
-    </div>
+<div class="page">
+  <a class="back" routerLink="/courses">
+    <mat-icon>arrow_back</mat-icon>
+    My courses
+  </a>
 
-    <!-- BACK BUTTON (Pill) -->
-    <a class="layout__back" routerLink="/courses">‹ My courses</a>
-
-    <!-- NAVIGATION -->
-    <mat-nav-list class="layout__nav">
-      @for (item of navItems; track item.path) {
-        <a
-          mat-list-item
-          [routerLink]="item.path"
-          routerLinkActive="is-active"
-          [disableRipple]="true"
-        >
-          <img matListItemIcon [src]="item.icon" alt="" class="nav-icon" />
-          <span matListItemTitle>{{ item.label }}</span>
-        </a>
+  <header
+    class="banner"
+    [class.has-image]="!!cover()"
+    [style.--c1]="design.c1"
+    [style.--c2]="design.c2"
+    [attr.data-pattern]="design.pattern"
+    [style.background]="bannerBackground()"
+  >
+    <div class="banner__text">
+      <h1 class="banner__name">{{ section()?.name ?? 'Section' }}</h1>
+      @if (section(); as current) {
+        <p class="banner__code">Section code: {{ current.sectionCode }}</p>
       }
-    </mat-nav-list>
-
-    <!-- USER INFO -->
-    <div class="layout__user-container">
-      <div class="layout__user-info">
-        <span class="layout__user-name">{{ teacherName() }}</span>
-        <button class="logout-pill" (click)="logout()">
-          <img src="/assets/images/icon-logout.svg" alt="" style="width: 12px; margin-right: 4px" />
-          Log out
-        </button>
-      </div>
-
-      <span class="layout__avatar-btn" style="cursor: default">
-        <img class="layout__avatar" [src]="avatarSrc()" alt="Profile photo" />
-      </span>
     </div>
-  </mat-sidenav>
 
-  <mat-sidenav-content class="layout__content">
-    <header class="banner" [style.background]="bannerBackground()">
-      <div class="banner__text">
-        <h1 class="banner__name">{{ section()?.name ?? 'Section' }}</h1>
-        @if (section(); as current) {
-          <p class="banner__code">Section code: {{ current.sectionCode }}</p>
-        }
-      </div>
-
-      <!-- Cover controls -->
-      <input
-        #coverInput
-        type="file"
-        hidden
-        accept="image/png,image/jpeg,image/webp"
-        (change)="onCoverSelected($event)"
-      />
-      <button
-        type="button"
-        class="banner__edit"
-        aria-label="Change cover"
-        [matMenuTriggerFor]="coverMenu"
-      >
-        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-          <path
-            d="M21 19V5a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2zM8.5 13.5l2.5 3 3.5-4.5 4.5 6H5l3.5-4.5z"
-          />
-        </svg>
-        Change cover
+    <!-- Cover controls -->
+    <input
+      #coverInput
+      type="file"
+      hidden
+      accept="image/png,image/jpeg,image/webp"
+      (change)="onCoverSelected($event)"
+    />
+    <button
+      type="button"
+      class="banner__edit"
+      aria-label="Change cover"
+      [matMenuTriggerFor]="coverMenu"
+    >
+      <mat-icon>image</mat-icon>
+      Change cover
+    </button>
+    <mat-menu #coverMenu="matMenu" panelClass="cover-menu">
+      <button mat-menu-item type="button" (click)="coverInput.click()">Upload image</button>
+      <button mat-menu-item type="button" [disabled]="!cover()" (click)="resetCover()">
+        Use default
       </button>
-      <mat-menu #coverMenu="matMenu" panelClass="custom-lms-menu">
-        <button mat-menu-item type="button" (click)="coverInput.click()">Upload image</button>
-        <button mat-menu-item type="button" [disabled]="!cover()" (click)="resetCover()">
-          Use default
-        </button>
-      </mat-menu>
-    </header>
-    <router-outlet />
-  </mat-sidenav-content>
-</mat-sidenav-container>
+    </mat-menu>
+  </header>
+
+  <nav class="tabs" aria-label="Section">
+    @for (item of navItems; track item.path) {
+      <a class="tab" [routerLink]="item.path" routerLinkActive="active">
+        <mat-icon>{{ item.icon }}</mat-icon>
+        <span>{{ item.label }}</span>
+      </a>
+    }
+  </nav>
+
+  <router-outlet />
+</div>

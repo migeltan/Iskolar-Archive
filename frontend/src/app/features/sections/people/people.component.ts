@@ -3,7 +3,7 @@ import { ActivatedRoute } from '@angular/router';
 import { CoursesService, courseErrorMessage } from '../../../core/services/courses';
 import { Student } from '../../../shared/models/lms.models';
 
-const AVATAR_COLORS = ['#ffd9d5', '#f7d6e8', '#e3d9f5', '#ffe8c9', '#d8efe6'];
+const AVATAR_COLORS = ['#f6dcd8', '#f1e4c8', '#e6dccf', '#dfe8e3', '#e2e4ee'];
 
 @Component({
   selector: 'app-people',

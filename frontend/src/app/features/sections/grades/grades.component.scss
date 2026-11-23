@@ -1,113 +1,60 @@
-$accent: #f4847b;
-$bg: #fff9f9;
-$font-body: 'TT Drugs', 'Poppins', sans-serif;
-
 :host {
   display: block;
-  font-family: $font-body;
-  color: $accent;
 }
 
-.grades {
-  padding: 2rem;
-  overflow-x: auto;
+// ---------- Ruled panel ----------
+.panel {
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: 12px;
+  background: #fff;
+}
 
-  &__toolbar {
-    display: flex;
-    justify-content: flex-end;
-    gap: 0.75rem;
-    margin-bottom: 1rem;
-  }
+.panel-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 20px;
+  border-bottom: 1px solid var(--mat-sys-outline-variant);
 
-  &__table {
-    width: 100%;
-    background: $bg;
-    color: $accent;
-    border: 1px solid $accent;
-  }
-
-  &__empty {
-    padding: 4rem 2rem;
-    font-size: 1.2rem;
-    text-align: center;
-    background: #fff;
-    border: 1px dashed $accent;
-    border-radius: 12px;
-    color: #777;
-
-    strong {
-      color: $accent;
-      font-size: 1.3rem;
-    }
-  }
-
-  &__error {
-    margin: 0 0 0.75rem;
-    color: #b3261e;
-    font-size: 0.95rem;
-  }
-
-  &__points {
-    display: block;
-    font-weight: 400;
-    font-size: 0.8rem;
-    color: #777;
-  }
-
-  &__score {
-    display: block;
-    font-weight: 600;
-    font-size: 1rem;
-  }
-
-  &__edit {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-
-  &__input {
-    width: 64px;
-    padding: 4px 8px;
-    font: inherit;
-    font-weight: 600;
-    color: $accent;
-    background: #fff;
-    border: 1px solid $accent;
-    border-radius: 8px;
-    outline: none;
-
-    &:focus {
-      box-shadow: 0 0 0 2px rgba($accent, 0.25);
-    }
-  }
-
-  &__max {
-    font-size: 0.9rem;
-    color: #777;
-  }
-
-  &__status {
-    font-size: 0.8rem;
-    color: #777;
+  h2 {
+    margin: 0;
+    font: var(--mat-sys-title-medium);
   }
 }
 
-/* --- pill buttons --- */
+.count {
+  min-width: 24px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #800000;
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.head-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-left: auto;
+}
+
+// ---------- Buttons ----------
 .pill-btn {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   height: 40px;
-  padding: 0 18px;
-  font: inherit;
-  font-weight: 600;
-  color: $accent;
-  background: transparent;
-  border: 1px solid $accent;
+  padding: 0 18px 0 14px;
+  border: 1px solid var(--mat-sys-outline);
   border-radius: 999px;
+  background: transparent;
+  color: var(--mat-sys-primary);
+  font: inherit;
+  font-weight: 500;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: background-color 0.18s ease;
 
   svg {
     width: 20px;
@@ -116,27 +63,127 @@ $font-body: 'TT Drugs', 'Poppins', sans-serif;
   }
 
   &:hover {
-    background: rgba($accent, 0.1);
+    background: rgba(128, 0, 0, 0.08);
+  }
+
+  &:focus-visible {
+    outline: 2px solid #e8b84a;
+    outline-offset: 2px;
   }
 
   &--solid {
+    border-color: #800000;
+    background: #800000;
     color: #fff;
-    background: $accent;
 
     &:hover {
-      background: #ee6f65;
+      background: #5c0000;
     }
   }
 }
 
+// ---------- States ----------
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin: 0;
+  padding: 56px 16px;
+  border: 2px dashed var(--mat-sys-outline-variant);
+  border-radius: 12px;
+  background: #fff;
+  color: var(--mat-sys-on-surface-variant);
+  text-align: center;
+
+  strong {
+    color: #800000;
+    font-size: 1.2rem;
+    letter-spacing: 1px;
+  }
+}
+
+.error {
+  margin: 12px 20px 0;
+  padding: 12px 16px;
+  border-radius: 8px;
+  background: #fdecea;
+  color: #8a1c1c;
+  font-size: 0.9rem;
+}
+
+// ---------- Table ----------
+.table-wrap {
+  overflow-x: auto;
+}
+
+.grades__table {
+  width: 100%;
+  background: transparent;
+}
+
 th.mat-mdc-header-cell {
-  background: rgba($accent, 0.1) !important;
-  color: $accent !important;
+  background: var(--mat-sys-surface) !important;
+  color: var(--mat-sys-on-surface) !important;
   font-weight: 600;
-  font-family: $font-body;
+  vertical-align: bottom;
+  border-bottom: 1px solid var(--mat-sys-outline-variant);
 }
 
 td.mat-mdc-cell {
-  color: $accent;
-  border-bottom: 1px solid rgba($accent, 0.2) !important;
+  border-bottom: 1px solid var(--mat-sys-outline-variant);
+}
+
+tr.mat-mdc-row:last-child td.mat-mdc-cell {
+  border-bottom: 0;
+}
+
+.grades__points {
+  display: block;
+  color: var(--mat-sys-on-surface-variant);
+  font-size: 0.8rem;
+  font-weight: 400;
+}
+
+.grades__score {
+  display: block;
+  font-weight: 600;
+}
+
+.grades__status {
+  color: var(--mat-sys-on-surface-variant);
+  font-size: 0.8rem;
+}
+
+.grades__edit {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.grades__input {
+  width: 64px;
+  padding: 4px 8px;
+  border: 1px solid var(--mat-sys-outline);
+  border-radius: 8px;
+  background: #fff;
+  color: inherit;
+  font: inherit;
+  font-weight: 600;
+
+  &:focus-visible {
+    outline: 2px solid #e8b84a;
+    outline-offset: 1px;
+  }
+}
+
+.grades__max {
+  color: var(--mat-sys-on-surface-variant);
+  font-size: 0.9rem;
+}
+
+@media (max-width: 600px) {
+  .panel-head {
+    flex-wrap: wrap;
+  }
 }

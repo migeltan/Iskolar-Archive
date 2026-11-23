@@ -1,12 +1,13 @@
 import { DatePipe } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
+import { MatIconModule } from '@angular/material/icon';
 import { ActivatedRoute } from '@angular/router';
 import { Announcements, StreamComment, StreamPost } from '../../../core/services/announcements';
 
 @Component({
   selector: 'app-stream',
   standalone: true,
-  imports: [DatePipe],
+  imports: [DatePipe, MatIconModule],
   templateUrl: './stream.component.html',
   styleUrl: './stream.component.scss',
 })
