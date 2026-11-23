@@ -1,0 +1,182 @@
+@use '../../../shared/layout/shell/nav';
+
+@include nav.nav-item;
+
+:host {
+  display: block;
+}
+
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.divider {
+  height: 1px;
+  margin: 8px 4px;
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 4px 12px 2px;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.count {
+  color: rgba(255, 255, 255, 0.6);
+  letter-spacing: 0;
+}
+
+// Quick filter, shown only for long lists.
+.filter {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 38px;
+  margin: 4px 0 6px;
+  padding: 0 12px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.8);
+
+  &:focus-within {
+    outline: 2px solid #e8b84a;
+  }
+
+  mat-icon {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    font-size: 20px;
+  }
+
+  input {
+    flex: 1;
+    min-width: 0;
+    border: 0;
+    outline: 0;
+    background: none;
+    color: #fff;
+    font-family: inherit;
+    font-size: 0.9rem;
+
+    &::placeholder {
+      color: rgba(255, 255, 255, 0.55);
+    }
+  }
+}
+
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+button.item {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  font-family: inherit;
+  text-align: left;
+}
+
+// A course header: the coloured dot stays visible when the rail is collapsed.
+.item.course {
+  height: 48px;
+  padding-left: 8px;
+}
+
+.dot {
+  display: grid;
+  flex: 0 0 32px;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.35);
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  line-height: 1.2;
+}
+
+.code {
+  overflow: hidden;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-overflow: ellipsis;
+}
+
+.sec {
+  overflow: hidden;
+  font-size: 0.75rem;
+  font-weight: 400;
+  opacity: 0.7;
+  text-overflow: ellipsis;
+}
+
+.chev {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  margin-left: auto;
+  font-size: 20px;
+  opacity: 0.7;
+}
+
+// Sections under an open course.
+.sections {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0 0 4px 22px;
+  padding: 0 0 0 12px;
+  border-left: 2px solid rgba(255, 255, 255, 0.18);
+  list-style: none;
+}
+
+.item.sub {
+  height: 36px;
+  padding: 0 12px;
+  font-size: 0.9rem;
+}
+
+.none {
+  margin: 0;
+  padding: 8px 12px;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.8rem;
+}
+
+.sk {
+  opacity: 0.35;
+}
+
+// Collapsed rail: one dot per course.
+:host(.collapsed) {
+  .label,
+  .heading {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .heading {
+    display: none;
+  }
+}

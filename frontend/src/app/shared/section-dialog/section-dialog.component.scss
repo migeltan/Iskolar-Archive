@@ -1,31 +1,17 @@
-$accent: #f4847b;
-$bg: #fff9f9;
-$font-heading: 'The Seasons', serif;
-$font-body: 'TT Drugs', 'Poppins', sans-serif;
-
 :host {
   display: block;
-  background: $bg;
-  font-family: $font-body;
+  --mat-button-filled-container-shape: 999px;
+  --mat-button-outlined-container-shape: 999px;
+  --mat-button-text-container-shape: 999px;
 }
 
 .section-dialog {
-  &__title {
-    color: $accent;
-    font-family: $font-heading;
-  }
-
   &__field {
     width: 100%;
   }
 
   &__hint {
     margin: 0;
-    color: $accent;
-  }
-
-  &__save {
-    background: $accent;
-    color: #fff;
+    color: var(--mat-sys-on-surface-variant);
   }
 }

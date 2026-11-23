@@ -34,11 +34,34 @@
     <section class="panel">
       <div class="panel-head">
         <h2>My courses</h2>
-        <span class="count">{{ courses().length }}</span>
+        <span class="count">{{
+          query() ? shown().length + ' of ' + courses().length : courses().length
+        }}</span>
+      </div>
+
+      <div class="toolbar">
+        <label class="search">
+          <mat-icon>search</mat-icon>
+          <input
+            type="search"
+            placeholder="Search courses, codes or sections"
+            aria-label="Search courses"
+            [value]="query()"
+            (input)="onSearch($event)"
+          />
+        </label>
+        <label class="sort">
+          <span>Sort</span>
+          <select [value]="sort()" (change)="onSort($event)" aria-label="Sort courses">
+            <option value="added">Date added</option>
+            <option value="az">A–Z</option>
+            <option value="sections">Most sections</option>
+          </select>
+        </label>
       </div>
 
       <div class="courses">
-        @for (course of courses(); track course.id) {
+        @for (course of shown(); track course.id) {
           <article class="course-card">
             <div
               class="banner"
@@ -74,7 +97,7 @@
             </div>
 
             <ul class="sections">
-              @for (section of course.sections; track section.id) {
+              @for (section of visibleSections(course); track section.id) {
                 <li class="section-row">
                   <a class="section-name" [routerLink]="['/section', section.id, 'stream']">
                     {{ section.name }}
@@ -115,6 +138,21 @@
               }
             </ul>
 
+            @if (canToggle(course)) {
+              <button
+                class="show-more"
+                type="button"
+                [attr.aria-expanded]="isExpanded(course)"
+                (click)="toggleSections(course)"
+              >
+                {{
+                  isExpanded(course)
+                    ? 'Show less'
+                    : 'Show all ' + course.sections.length + ' sections'
+                }}
+              </button>
+            }
+
             <div class="card-foot">
               <button mat-stroked-button type="button" (click)="createSection(course)">
                 <mat-icon>add</mat-icon>
@@ -122,6 +160,8 @@
               </button>
             </div>
           </article>
+        } @empty {
+          <p class="no-results">No courses match “{{ query() }}”.</p>
         }
       </div>
     </section>

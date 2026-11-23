@@ -51,6 +51,81 @@ export class DashboardComponent implements OnInit {
 
   protected readonly design = sectionDesign;
 
+  /** Search text and sort order for the course grid. */
+  protected readonly query = signal('');
+  protected readonly sort = signal<'added' | 'az' | 'sections'>('added');
+  private readonly needle = computed(() => this.query().trim().toLowerCase());
+
+  /** Courses after search and sort ("added" keeps the order they were created in). */
+  protected readonly shown = computed(() => {
+    const q = this.needle();
+    let list = this.courses();
+    if (q) {
+      list = list.filter(
+        (course) =>
+          this.matchesCourse(course) ||
+          course.sections.some((section) => section.name.toLowerCase().includes(q)),
+      );
+    }
+    const sorted = [...list];
+    if (this.sort() === 'az') {
+      sorted.sort((a, b) => a.title.localeCompare(b.title));
+    } else if (this.sort() === 'sections') {
+      sorted.sort((a, b) => b.sections.length - a.sections.length);
+    }
+    return sorted;
+  });
+
+  /** How many sections a card shows before "Show all". */
+  protected readonly sectionPreview = 3;
+  private readonly expanded = signal<ReadonlySet<string>>(new Set());
+
+  protected onSearch(event: Event): void {
+    this.query.set((event.target as HTMLInputElement).value);
+  }
+
+  protected onSort(event: Event): void {
+    this.sort.set((event.target as HTMLSelectElement).value as 'added' | 'az' | 'sections');
+  }
+
+  private matchesCourse(course: Course): boolean {
+    const q = this.needle();
+    return course.title.toLowerCase().includes(q) || course.code.toLowerCase().includes(q);
+  }
+
+  /** True when the search matched only this course's section names. */
+  private sectionMatchOnly(course: Course): boolean {
+    return this.needle() !== '' && !this.matchesCourse(course);
+  }
+
+  protected canToggle(course: Course): boolean {
+    return !this.sectionMatchOnly(course) && course.sections.length > this.sectionPreview;
+  }
+
+  protected isExpanded(course: Course): boolean {
+    return this.expanded().has(course.id);
+  }
+
+  protected visibleSections(course: Course): Course['sections'] {
+    if (this.sectionMatchOnly(course)) {
+      const q = this.needle();
+      return course.sections.filter((section) => section.name.toLowerCase().includes(q));
+    }
+    return this.isExpanded(course)
+      ? course.sections
+      : course.sections.slice(0, this.sectionPreview);
+  }
+
+  protected toggleSections(course: Course): void {
+    this.expanded.update((current) => {
+      const next = new Set(current);
+      if (!next.delete(course.id)) {
+        next.add(course.id);
+      }
+      return next;
+    });
+  }
+
   ngOnInit(): void {
     void this.load();
   }

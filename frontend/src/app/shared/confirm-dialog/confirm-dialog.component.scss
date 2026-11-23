@@ -1,49 +1,44 @@
-$accent: #f4847b;
-$bg: #fff9f9;
-$font-heading: 'The Seasons', serif;
-$font-body: 'TT Drugs', 'Poppins', sans-serif;
+:host {
+  display: block;
+  --mat-button-filled-container-shape: 999px;
+  --mat-button-outlined-container-shape: 999px;
+  --mat-button-text-container-shape: 999px;
+}
 
 .confirm {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1.5rem;
-  padding: 2rem 2.5rem;
-  background: $bg;
+  gap: 1.25rem;
+  padding: 2rem 2.5rem 1.75rem;
   text-align: center;
 
   &__icon {
     display: grid;
     place-items: center;
-    width: 4rem;
-    height: 4rem;
+    width: 3.5rem;
+    height: 3.5rem;
     border-radius: 50%;
-    background: $accent;
+    background: var(--mat-sys-primary-container);
+    color: var(--mat-sys-primary);
 
-    img {
-      width: 2rem;
-      height: 2rem;
-      filter: brightness(0) invert(1);
+    mat-icon {
+      width: 1.75rem;
+      height: 1.75rem;
+      font-size: 1.75rem;
     }
   }
 
   &__message {
     max-width: 28rem;
     margin: 0;
-    color: $accent;
-    font-family: $font-heading;
-    font-size: 1.25rem;
+    color: var(--mat-sys-on-surface);
+    font: var(--mat-sys-body-large);
     line-height: 1.5;
   }
 
   &__actions {
     display: flex;
-    gap: 1rem;
-    font-family: $font-body;
-  }
-
-  &__delete {
-    background: $accent;
-    color: #fff;
+    gap: 0.75rem;
   }
 }

@@ -1,4 +1,9 @@
-$accent: #f4847b;
+:host {
+  display: block;
+  --mat-button-filled-container-shape: 999px;
+  --mat-button-outlined-container-shape: 999px;
+  --mat-button-text-container-shape: 999px;
+}
 
 .dialog-body {
   display: flex;
@@ -27,13 +32,14 @@ $accent: #f4847b;
   &__title {
     margin: 0 0 2px;
     font-size: 1rem;
-    color: $accent;
+    font-weight: 500;
+    color: var(--mat-sys-on-surface);
   }
 
   &__hint {
     margin: 0 0 12px;
     font-size: 0.85rem;
-    color: #777;
+    color: var(--mat-sys-on-surface-variant);
   }
 }
 
@@ -45,46 +51,17 @@ $accent: #f4847b;
   margin-bottom: 16px;
 
   &__name {
-    color: #555;
+    color: var(--mat-sys-on-surface-variant);
     font-size: 0.9rem;
     word-break: break-all;
   }
 }
 
 .msg-error {
-  color: #c0392b;
+  color: var(--mat-sys-error);
   font-size: 0.85rem;
   margin: 0;
   width: 100%;
-}
-
-/* coral buttons instead of blue */
-:host ::ng-deep {
-  button[mat-stroked-button] {
-    border: 1px solid $accent !important;
-    color: $accent !important;
-    border-radius: 999px !important;
-    font-weight: 600 !important;
-  }
-
-  button[mat-flat-button] {
-    background-color: $accent !important;
-    color: #fff !important;
-    border-radius: 999px !important;
-    font-weight: 600 !important;
-  }
-
-  button[mat-button] {
-    color: $accent !important;
-    font-weight: 600 !important;
-  }
-
-  .mat-mdc-form-field.mat-focused .mdc-notched-outline > * {
-    border-color: $accent !important;
-  }
-  .mat-mdc-form-field.mat-focused .mdc-floating-label {
-    color: $accent !important;
-  }
 }
 
 .file-list {
@@ -98,7 +75,7 @@ $accent: #f4847b;
     justify-content: space-between;
     gap: 12px;
     padding: 6px 0;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid var(--mat-sys-outline-variant);
   }
 }
 
@@ -113,7 +90,7 @@ $accent: #f4847b;
   padding: 0;
   border: 0;
   background: none;
-  color: #8a1c1c;
+  color: var(--mat-sys-primary);
   font: inherit;
   font-size: 0.8rem;
   text-decoration: underline;

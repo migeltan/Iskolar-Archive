@@ -1,0 +1,85 @@
+@if (auth.role() === 'teacher' || auth.role() === 'admin') {
+  <nav class="nav" aria-label="My courses and sections">
+    <div class="divider" role="presentation"></div>
+
+    @if (loading()) {
+      <div role="status" aria-label="Loading courses">
+        @for (n of [1, 2]; track n) {
+          <div class="item sk">
+            <app-skeleton width="32px" height="32px" radius="50%" />
+          </div>
+        }
+      </div>
+    } @else if (courses().length > 0) {
+      <p class="heading">
+        <span>Courses</span>
+        <span class="count">{{ courses().length }}</span>
+      </p>
+
+      @if (!collapsed() && courses().length > filterMin) {
+        <label class="filter">
+          <mat-icon>search</mat-icon>
+          <input
+            type="search"
+            placeholder="Filter"
+            aria-label="Filter courses and sections"
+            [value]="query()"
+            (input)="onFilter($event)"
+          />
+        </label>
+      }
+
+      @for (course of visible(); track course.id) {
+        <div class="group">
+          @if (collapsed()) {
+            <div
+              class="item course"
+              [matTooltip]="course.code + ' · ' + course.title"
+              matTooltipPosition="right"
+            >
+              <span class="dot" [style.background]="design(course.id).c1">{{
+                course.code.charAt(0)
+              }}</span>
+            </div>
+          } @else {
+            <button
+              type="button"
+              class="item course"
+              [attr.aria-expanded]="isOpen(course)"
+              (click)="toggle(course)"
+            >
+              <span class="dot" [style.background]="design(course.id).c1">{{
+                course.code.charAt(0)
+              }}</span>
+              <span class="text label">
+                <span class="code">{{ course.code }}</span>
+                <span class="sec">{{ course.title }}</span>
+              </span>
+              <mat-icon class="chev">{{ isOpen(course) ? 'expand_less' : 'expand_more' }}</mat-icon>
+            </button>
+
+            @if (isOpen(course)) {
+              <ul class="sections">
+                @for (s of sectionsOf(course); track s.id) {
+                  <li>
+                    <a
+                      class="item sub"
+                      [class.active]="activeSectionId() === s.id"
+                      [routerLink]="['/section', s.id, 'stream']"
+                    >
+                      <span class="label">{{ s.name }}</span>
+                    </a>
+                  </li>
+                } @empty {
+                  <li class="none">No sections yet</li>
+                }
+              </ul>
+            }
+          }
+        </div>
+      } @empty {
+        <p class="none">No matches</p>
+      }
+    }
+  </nav>
+}

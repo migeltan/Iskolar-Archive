@@ -4,6 +4,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { AuthService } from '../../../core/auth/auth.service';
 import { EnrolledNav } from '../../../features/dashboard/enrolled-nav/enrolled-nav';
+import { TeacherNav } from '../../../features/dashboard/teacher-nav/teacher-nav';
 
 @Component({
   selector: 'app-shell',
@@ -14,6 +15,7 @@ import { EnrolledNav } from '../../../features/dashboard/enrolled-nav/enrolled-n
     MatIconModule,
     MatTooltipModule,
     EnrolledNav,
+    TeacherNav,
   ],
   templateUrl: './shell.html',
   styleUrl: './shell.scss',

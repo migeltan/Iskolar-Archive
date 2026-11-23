@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
 import { Course, Section, Student } from '../../shared/models/lms.models';
 import { SUPABASE_CLIENT, StorageService } from '../../shared/storage/storage.service';
 import { AuthService } from '../auth/auth.service';
@@ -95,6 +95,9 @@ export class CoursesService {
   private readonly storage = inject(StorageService);
   private readonly auth = inject(AuthService);
 
+  /** Bumped after any change, so the sidebar course list reloads. */
+  readonly version = signal(0);
+
   /** The signed-in teacher's own courses, each with its sections. */
   async listMine(): Promise<Course[]> {
     const { data, error } = await this.supabase
@@ -131,6 +134,7 @@ export class CoursesService {
         coverFailed = true;
       }
     }
+    this.version.update((v) => v + 1);
     return { course, coverFailed };
   }
 
@@ -170,6 +174,7 @@ export class CoursesService {
         coverFailed = true;
       }
     }
+    this.version.update((v) => v + 1);
     return { course: saved, coverFailed };
   }
 
@@ -186,6 +191,7 @@ export class CoursesService {
     if (!data || data.length === 0) {
       throw new Error('You can only delete your own courses.');
     }
+    this.version.update((v) => v + 1);
   }
 
   /** The database issues the join code. */
@@ -198,6 +204,7 @@ export class CoursesService {
     if (error) {
       throw error;
     }
+    this.version.update((v) => v + 1);
     return toSection(data as unknown as SectionRow);
   }
 
