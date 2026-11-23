@@ -5,6 +5,7 @@ import {
   Attachment,
   GradebookRow,
   NewSubmission,
+  Submission,
   SubmissionWithFiles,
 } from '../models/classwork.models';
 
@@ -46,6 +47,11 @@ export class Submissions {
 
   listByStudent(studentId: string): Observable<SubmissionWithFiles[]> {
     return defer(() => from(this.fetchByStudent(studentId)));
+  }
+
+  /** Teacher: every submission of every activity in one section (for the grades table). */
+  listBySection(sectionId: string): Observable<Submission[]> {
+    return defer(() => from(this.fetchBySection(sectionId)));
   }
 
   submit(input: NewSubmission): Observable<SubmissionWithFiles> {
@@ -112,6 +118,17 @@ export class Submissions {
         student_name: profile?.full_name?.trim() || profile?.email || null,
       };
     });
+  }
+
+  private async fetchBySection(sectionId: string): Promise<Submission[]> {
+    const { data, error } = await this.supabase
+      .from('submissions')
+      .select('*, activities!inner(section_id)')
+      .eq('activities.section_id', sectionId);
+    if (error) throw error;
+    return (data as unknown as (Submission & { activities: unknown })[]).map(
+      ({ activities: _activities, ...row }) => row as Submission,
+    );
   }
 
   private async fetchByStudent(studentId: string): Promise<SubmissionWithFiles[]> {

@@ -3,6 +3,8 @@
 A web-based LMS in the style of Google Classroom and Canvas, built for our college.
 Team: 5 people (3rd year). Goal: actually usable by about 50 students plus a professor, on a free stack.
 
+> **Update (Nov 22-23):** Sign-in is **email + password only**. Google OAuth was removed, so every mention of Google sign-in below is history. Students use `@iskolarngbayan.pup.edu.ph`, staff use `@pup.edu.ph`, both enforced by a database trigger. Teacher accounts are approved by an admin. Quizzes are still Google Form links. The dates in the timeline below have passed.
+
 ---
 
 ## About This Project

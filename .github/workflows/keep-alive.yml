@@ -1,0 +1,16 @@
+name: Keep Supabase alive
+
+on:
+  schedule:
+    - cron: "0 1 * * 1,4" # Mon and Thu, 01:00 UTC
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Query the database
+        run: |
+          curl --fail --silent --show-error \
+            -H "apikey: sb_publishable_-HnAYYdYws-vMeKYXkApJw_6-Jvndwu" \
+            "https://dpvkgrpxjmqhzzdaidlk.supabase.co/rest/v1/allowed_email_domains?select=domain&limit=1"

@@ -1,8 +1,19 @@
 <section class="grades">
-  @if (!demoLoaded()) {
+  @if (loading()) {
+    <p class="grades__empty">Loading grades…</p>
+  } @else if (loadError()) {
+    <p class="grades__empty">
+      {{ loadError() }}
+      <button type="button" class="pill-btn" (click)="retry()">Try again</button>
+    </p>
+  } @else if (students().length === 0) {
     <p class="grades__empty">
       No students have joined yet. Share the Section Code:
-      <strong>{{ sectionCode }}</strong> with your class.
+      <strong>{{ sectionCode() }}</strong> with your class.
+    </p>
+  } @else if (activities().length === 0) {
+    <p class="grades__empty">
+      No activities yet. Create one in Classwork and the grades table will appear here.
     </p>
   } @else {
     <div class="grades__toolbar">
@@ -30,13 +41,17 @@
       </button>
     </div>
 
-    <table mat-table class="grades__table" [dataSource]="students">
+    @if (saveError()) {
+      <p class="grades__error" role="alert">{{ saveError() }}</p>
+    }
+
+    <table mat-table class="grades__table" [dataSource]="students()">
       <ng-container matColumnDef="student">
         <th mat-header-cell *matHeaderCellDef>Student</th>
         <td mat-cell *matCellDef="let student">{{ student.lastName }}, {{ student.firstName }}</td>
       </ng-container>
 
-      @for (activity of activities; track activity.id) {
+      @for (activity of activities(); track activity.id) {
         <ng-container [matColumnDef]="activity.id">
           <th mat-header-cell *matHeaderCellDef>
             {{ activity.title }}
@@ -50,7 +65,7 @@
                   type="number"
                   min="0"
                   [max]="activity.points"
-                  [value]="gradeFor(student.id, activity.id)?.score ?? ''"
+                  [value]="scoreFor(student.id, activity.id) ?? ''"
                   (change)="onScoreChange(student, activity, $event)"
                   [attr.aria-label]="'Score for ' + student.firstName + ' on ' + activity.title"
                 />
@@ -58,12 +73,10 @@
               </span>
             } @else {
               <span class="grades__score">
-                {{ gradeFor(student.id, activity.id)?.score ?? '_' }} / {{ activity.points }}
+                {{ scoreFor(student.id, activity.id) ?? '_' }} / {{ activity.points }}
               </span>
             }
-            <span class="grades__status">
-              {{ gradeFor(student.id, activity.id)?.status ?? 'Pending' }}
-            </span>
+            <span class="grades__status">{{ statusFor(student.id, activity.id) }}</span>
           </td>
         </ng-container>
       }
@@ -75,8 +88,8 @@
         </td>
       </ng-container>
 
-      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-      <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+      <tr mat-header-row *matHeaderRowDef="displayedColumns()"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns()"></tr>
     </table>
   }
 </section>
